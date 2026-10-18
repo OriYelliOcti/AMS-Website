@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-18T16:53:26+00:00",
+ "generated_at": "2026-10-18T16:54:45+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -130,6 +130,11 @@
        "slot": "Driver",
        "members": [
         {
+         "name": "AObro13",
+         "username": "ww_gaming",
+         "bot": false
+        },
+        {
          "name": "Bence",
          "username": "bence08478",
          "bot": false
@@ -137,16 +142,6 @@
         {
          "name": "Mirinda | MCL | 🇧🇭 | #32",
          "username": "mirindadrinkitup",
-         "bot": false
-        }
-       ]
-      },
-      {
-       "slot": "Reserve",
-       "members": [
-        {
-         "name": "AObro13",
-         "username": "ww_gaming",
          "bot": false
         }
        ]
