@@ -1,0 +1,1065 @@
+{
+ "schema": 1,
+ "generated_at": "2026-10-18T16:11:24+00:00",
+ "guild": {
+  "id": "1531921410107113542",
+  "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
+ },
+ "totals": {
+  "divisions": 4,
+  "teams": 41,
+  "rostered": 49,
+  "officials": 5
+ },
+ "divisions": [
+  {
+   "name": "F1",
+   "teams": [
+    {
+     "name": "[F1] Aston Martin Aramco",
+     "short": "Aston Martin Aramco",
+     "color": "#11806a",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "ASTO | Jamie",
+         "username": "gallon_allen",
+         "id": "1205973053260038294",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Atlassian Williams",
+     "short": "Atlassian Williams",
+     "color": "#206694",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F1] Glitch GP",
+     "short": "Glitch GP",
+     "color": "#050405",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "LeYeetBoi",
+         "username": "leyeetbol",
+         "id": "1413055226511888454",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Unironically",
+         "username": "serialdesignationn7",
+         "id": "1454525401635360874",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] HONDA · VOLTEX/TOP FUEL RACING",
+     "short": "HONDA · VOLTEX/TOP FUEL RACING",
+     "color": "#cc0000",
+     "member_count": 5,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "JSDF_TRIGGER",
+         "username": "tirgger1",
+         "id": "728946171837677579",
+         "bot": false
+        },
+        {
+         "name": "うまスペシャルウィーク",
+         "username": "uma_specialweek",
+         "id": "850029754044252180",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Principal",
+       "members": [
+        {
+         "name": "さきいか",
+         "username": "mio_ao",
+         "id": "1293490574187565059",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "RuTa | 🇯🇵 |",
+         "username": "ruta_0160",
+         "id": "1359204100977463437",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Akicha289",
+         "username": "akichiyaakitya102",
+         "id": "1467465834568880138",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] McLaren Mastercard",
+     "short": "McLaren Mastercard",
+     "color": "#e67e22",
+     "member_count": 5,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Bence",
+         "username": "bence08478",
+         "id": "1483872903765164143",
+         "bot": false
+        },
+        {
+         "name": "Mirinda | MCL | 🇧🇭 | #32",
+         "username": "mirindadrinkitup",
+         "id": "1033809952814420059",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Reserve",
+       "members": [
+        {
+         "name": "AObro13",
+         "username": "ww_gaming",
+         "id": "1089804934465204254",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Octi | MCL | Owner",
+         "username": "emreeduardo",
+         "id": "925812610274852934",
+         "bot": false
+        },
+        {
+         "name": "Vin | MCL | 🇮🇩 | F1 | 🛠️",
+         "username": "indoavgeek17",
+         "id": "1228665484845514834",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Mercedes AMG // PETRONAS",
+     "short": "Mercedes AMG // PETRONAS",
+     "color": "#1abc9c",
+     "member_count": 4,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Bread | MER | 🇮🇩 | F1 | #29",
+         "username": "not_sergioperez101",
+         "id": "895506632010793030",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Principal",
+       "members": [
+        {
+         "name": "Godzilla | MER | 🇪🇬 | F1 | 👔",
+         "username": "godzilla_zain",
+         "id": "1235993592363876423",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Maxi | MER/HIT | 🇩🇪/🇬🇧 | 👑",
+         "username": "mmverstappen33vdagreat_48117",
+         "id": "1447626343474004133",
+         "bot": false
+        },
+        {
+         "name": "Toast | MER/AMG/HAR | 🇩🇪 | 👑",
+         "username": "maxi_12.5",
+         "id": "1541526912294457472",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Oracle RedBull Racing Ford",
+     "short": "Oracle RedBull Racing Ford",
+     "color": "#1b3aea",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F1] Pepsi Britannia Racing F1 Team",
+     "short": "Pepsi Britannia Racing F1 Team",
+     "color": "#ffffff",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F1] Scuderia Ferrari // HP",
+     "short": "Scuderia Ferrari // HP",
+     "color": "#e12323",
+     "member_count": 4,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "drsferra7",
+         "username": "drsferra7",
+         "id": "1307001657564987412",
+         "bot": false
+        },
+        {
+         "name": "Ishowmaker | FER | 🇧🇷 | #97",
+         "username": "clarky9720",
+         "id": "593150644446167079",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Knownn | FER/EZE | 🇦🇺 | 👑",
+         "username": "twistiee12",
+         "id": "1027483008632098836",
+         "bot": false
+        },
+        {
+         "name": "the | FER | 🇳🇿 | 👑",
+         "username": "user132222",
+         "id": "1293318515687821404",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] TGR Haas Formula 1 Team",
+     "short": "TGR Haas Formula 1 Team",
+     "color": "#992d22",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "El_Silkmeister",
+         "username": "silkyboi_2",
+         "id": "1550176078775984134",
+         "bot": false
+        },
+        {
+         "name": "Silky | TGR/MAW | 🇬🇧 | 👑",
+         "username": "silkyboi1281",
+         "id": "1455314656234049685",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Tuhago Mobil 1 Formula 1 Team",
+     "short": "Tuhago Mobil 1 Formula 1 Team",
+     "color": "#0f0e5b",
+     "member_count": 3,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "anti | #3 | TUH",
+         "username": "6antzi",
+         "id": "1440319450946469940",
+         "bot": false
+        },
+        {
+         "name": "blessingjonah241",
+         "username": "blessingjonah241_67986",
+         "id": "1142105003876679842",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Sono",
+         "username": "covxger",
+         "id": "1224871588776902768",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Visa-Cash App Racing Bulls",
+     "short": "Visa-Cash App Racing Bulls",
+     "color": "#ffffff",
+     "member_count": 0,
+     "slots": []
+    }
+   ]
+  },
+  {
+   "name": "F2",
+   "teams": [
+    {
+     "name": "[F2] AlphaTauri Bullseye Motorsport",
+     "short": "AlphaTauri Bullseye Motorsport",
+     "color": "#206694",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F2] AstraGP Meta Formula 2 Team",
+     "short": "AstraGP Meta Formula 2 Team",
+     "color": "#8c19e1",
+     "member_count": 4,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Martinas | AST | 🇸🇰 | #31",
+         "username": "martinas33",
+         "id": "1547933998397784208",
+         "bot": false
+        },
+        {
+         "name": "Psorid | AST | 🇹🇭 | #10",
+         "username": "robloxpsorid2",
+         "id": "1528410570448179272",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Reserve",
+       "members": [
+        {
+         "name": "vroom🏎️",
+         "username": "vroom39",
+         "id": "1555826099815063565",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Octi | MCL | Owner",
+         "username": "emreeduardo",
+         "id": "925812610274852934",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] AWS Hex Racing F2 Team",
+     "short": "AWS Hex Racing F2 Team",
+     "color": "#ffffff",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Facts | HEX | 🇺🇸 | #24",
+         "username": "348772.",
+         "id": "1184662723406082078",
+         "bot": false
+        },
+        {
+         "name": "Tob~Vista~Lolo",
+         "username": "vistalolo_89343",
+         "id": "1369400578131628178",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Haribo Monster Motorsports",
+     "short": "Haribo Monster Motorsports",
+     "color": "#91f116",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Ironhxde | HAR | 🇵🇭 | #84",
+         "username": "iron_roblox",
+         "id": "1241350342877253696",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Toast | MER/AMG/HAR | 🇩🇪 | 👑",
+         "username": "maxi_12.5",
+         "id": "1541526912294457472",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] HONDA · VOLTEX/TOP FUEL RACING",
+     "short": "HONDA · VOLTEX/TOP FUEL RACING",
+     "color": "#cc0000",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "RuTa | 🇯🇵 |",
+         "username": "ruta_0160",
+         "id": "1359204100977463437",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Intel Dynamics F2 Team",
+     "short": "Intel Dynamics F2 Team",
+     "color": "#3498db",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Valeto | INT | 🇧🇬 | #23",
+         "username": "valeto0871_85311",
+         "id": "1491420666048675901",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Make A Wish Motorsports F2 Team",
+     "short": "Make A Wish Motorsports F2 Team",
+     "color": "#3498db",
+     "member_count": 3,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Theoxodh | MAW | 🇰🇷 | #71",
+         "username": "happy_theooooooooooooooooooooooo",
+         "id": "972070626040872980",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "El_Silkmeister",
+         "username": "silkyboi_2",
+         "id": "1550176078775984134",
+         "bot": false
+        },
+        {
+         "name": "Silky | TGR/MAW | 🇬🇧 | 👑",
+         "username": "silkyboi1281",
+         "id": "1455314656234049685",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Motul Falcon Motorsports F2 Team",
+     "short": "Motul Falcon Motorsports F2 Team",
+     "color": "#e67e22",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Crabee | FAL | 🇵🇰 | #91",
+         "username": "crabeecattyalt",
+         "id": "1500484433700982858",
+         "bot": false
+        },
+        {
+         "name": "Tymmy | FAL | 🇦🇺 | #81",
+         "username": "norri_886",
+         "id": "1506342934122070127",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Nokia Nick Kerrs F2 Team",
+     "short": "Nokia Nick Kerrs F2 Team",
+     "color": "#1943d3",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Peters | NOK | 🇨🇱 | #19",
+         "username": "petercrack",
+         "id": "756520150072557620",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F2] Rust.Eze HP F2 Team",
+     "short": "Rust.Eze HP F2 Team",
+     "color": "#d61e1e",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Asax",
+         "username": "alecifariell",
+         "id": "1235985875847090336",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Knownn | FER/EZE | 🇦🇺 | 👑",
+         "username": "twistiee12",
+         "id": "1027483008632098836",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "F3",
+   "teams": [
+    {
+     "name": "[F3] Intel Dynamics F3 Team",
+     "short": "Intel Dynamics F3 Team",
+     "color": "#3498db",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] AlphaTauri Bullseye Motorsport",
+     "short": "AlphaTauri Bullseye Motorsport",
+     "color": "#206694",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] AstraGP Meta Formula 3 Team",
+     "short": "AstraGP Meta Formula 3 Team",
+     "color": "#8c19e1",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] AWS Hex Racing F3 Team",
+     "short": "AWS Hex Racing F3 Team",
+     "color": "#ffffff",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] Haribo Monster Motorsports",
+     "short": "Haribo Monster Motorsports",
+     "color": "#91f116",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] HONDA · VOLTEX/TOP FUEL RACING",
+     "short": "HONDA · VOLTEX/TOP FUEL RACING",
+     "color": "#cc0000",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "RuTa | 🇯🇵 |",
+         "username": "ruta_0160",
+         "id": "1359204100977463437",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F3] Make A Wish Motorsports F3 Team",
+     "short": "Make A Wish Motorsports F3 Team",
+     "color": "#3498db",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "El_Silkmeister",
+         "username": "silkyboi_2",
+         "id": "1550176078775984134",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F3] Motul Falcon Motorsports F3 Team",
+     "short": "Motul Falcon Motorsports F3 Team",
+     "color": "#e67e22",
+     "member_count": 0,
+     "slots": []
+    },
+    {
+     "name": "[F3] Rust.Eze HP F3 Team",
+     "short": "Rust.Eze HP F3 Team",
+     "color": "#d52222",
+     "member_count": 0,
+     "slots": []
+    }
+   ]
+  },
+  {
+   "name": "GT3",
+   "teams": [
+    {
+     "name": "[GT3] Aston Martin Vantage GT3",
+     "short": "Aston Martin Vantage GT3",
+     "color": "#11806a",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Vradical | AMR | 🇨🇦 | #34",
+         "username": "v0ltaoi",
+         "id": "1466591983085813873",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Bayerische Motoren Werke M4",
+     "short": "Bayerische Motoren Werke M4",
+     "color": "#206694",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Recon | BMW | 🇵🇭 | #6",
+         "username": "reconkeyofficia1",
+         "id": "1458465423392641144",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Chevrolet Corvette Z06 GT3.R",
+     "short": "Chevrolet Corvette Z06 GT3.R",
+     "color": "#f1c40f",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Striker | CHE | 🇵🇭 | #50",
+         "username": "madmaxy33_alt",
+         "id": "1500819626182049985",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Ferrari 296 GT3",
+     "short": "Ferrari 296 GT3",
+     "color": "#da1e1e",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Juggernaut | FER | 🇵🇭 | #46",
+         "username": "markjhedrict_77590",
+         "id": "1190111562745262101",
+         "bot": false
+        },
+        {
+         "name": "Zavy | BRI/FER | 🇨🇿 | 🛠️ / #2",
+         "username": "zavykos_",
+         "id": "1315743240095268915",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Ford Mustang GT3",
+     "short": "Ford Mustang GT3",
+     "color": "#000dff",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Prince | FOR | 🇿🇦 | #54",
+         "username": "_blackwool5431",
+         "id": "1011304982747811840",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Thiên | FOR | 🇮🇩 | 📊",
+         "username": "miyamura05100",
+         "id": "1265367817230876756",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Lexus RC F GT3",
+     "short": "Lexus RC F GT3",
+     "color": "#1abc9c",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "AObro13",
+         "username": "ww_gaming",
+         "id": "1089804934465204254",
+         "bot": false
+        },
+        {
+         "name": "Pro | LEX | 🇮🇩 | #28",
+         "username": "archiveeth",
+         "id": "756059351739006988",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] McLaren 720S GT3 Evo",
+     "short": "McLaren 720S GT3 Evo",
+     "color": "#e67e22",
+     "member_count": 2,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Molly",
+         "username": "iron0.1",
+         "id": "1438746943118512313",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Octi | MCL | Owner",
+         "username": "emreeduardo",
+         "id": "925812610274852934",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Mercedes-AMG GT3",
+     "short": "Mercedes-AMG GT3",
+     "color": "#6c6c6c",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Toast | MER/AMG/HAR | 🇩🇪 | 👑",
+         "username": "maxi_12.5",
+         "id": "1541526912294457472",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Nissan GT-R NISMO GT3",
+     "short": "Nissan GT-R NISMO GT3",
+     "color": "#ffffff",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Driver",
+       "members": [
+        {
+         "name": "Berkkoi | NIS | 🇹🇷 | #90",
+         "username": "berkkoi",
+         "id": "1264861003343069306",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[GT3] Porsche 911 GT3",
+     "short": "Porsche 911 GT3",
+     "color": "#a84300",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Team Boss",
+       "members": [
+        {
+         "name": "Cash | POR | 🇺🇸 | 👑",
+         "username": "mitchellpixel",
+         "id": "1519520937538486414",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "officials": [
+  {
+   "role": "[🧑‍✈️] Fédération Internationale de l'Automobile",
+   "members": [
+    {
+     "name": "Dream | FIA | 🇦🇺 | SEC",
+     "username": "dreamneedsadog",
+     "id": "1293115472920973363",
+     "bot": false
+    },
+    {
+     "name": "KB | FIA | 🇮🇳 | F1 | SC",
+     "username": "kingbhuvanplayz",
+     "id": "575929000761753601",
+     "bot": false
+    },
+    {
+     "name": "Kimi | AU | Owner",
+     "username": "jumner2468",
+     "id": "1494139629203623966",
+     "bot": false
+    },
+    {
+     "name": "Neon | FIA Pres | 🇨🇦 | F1 D",
+     "username": "neon32133",
+     "id": "1543345407898292356",
+     "bot": false
+    },
+    {
+     "name": "Niki | FIA | 🇮🇹 | STW",
+     "username": "niki301242",
+     "id": "1545095176450482283",
+     "bot": false
+    },
+    {
+     "name": "Rino | FIA | 🇧🇪 | SEC",
+     "username": "rino05832",
+     "id": "1522225565908729927",
+     "bot": false
+    },
+    {
+     "name": "umm | FIA | 🇺🇸 | PRES",
+     "username": "ummmmm09854",
+     "id": "1485330326447329462",
+     "bot": false
+    }
+   ]
+  },
+  {
+   "role": "[🧑‍💻] FIA Assistants",
+   "members": [
+    {
+     "name": "Aggos6",
+     "username": "aggos6.",
+     "id": "1363153265612554543",
+     "bot": false
+    },
+    {
+     "name": "Dream | FIA | 🇦🇺 | SEC",
+     "username": "dreamneedsadog",
+     "id": "1293115472920973363",
+     "bot": false
+    },
+    {
+     "name": "Night Alloy | FIA | 🇬🇧 | SEC",
+     "username": "night_alloy",
+     "id": "1182363379613061150",
+     "bot": false
+    },
+    {
+     "name": "Rino | FIA | 🇧🇪 | SEC",
+     "username": "rino05832",
+     "id": "1522225565908729927",
+     "bot": false
+    }
+   ]
+  },
+  {
+   "role": "[👷] FIA Stewards",
+   "members": [
+    {
+     "name": "Kimi | AU | Owner",
+     "username": "jumner2468",
+     "id": "1494139629203623966",
+     "bot": false
+    },
+    {
+     "name": "Niki | FIA | 🇮🇹 | STW",
+     "username": "niki301242",
+     "id": "1545095176450482283",
+     "bot": false
+    }
+   ]
+  },
+  {
+   "role": "[🧑‍⚖️] FIA Director",
+   "members": [
+    {
+     "name": "Aggos6",
+     "username": "aggos6.",
+     "id": "1363153265612554543",
+     "bot": false
+    },
+    {
+     "name": "Kimi | AU | Owner",
+     "username": "jumner2468",
+     "id": "1494139629203623966",
+     "bot": false
+    }
+   ]
+  },
+  {
+   "role": "[🧑‍✈️] FIA President",
+   "members": [
+    {
+     "name": "Neon | FIA Pres | 🇨🇦 | F1 D",
+     "username": "neon32133",
+     "id": "1543345407898292356",
+     "bot": false
+    }
+   ]
+  }
+ ]
+}
