@@ -88,7 +88,44 @@ body {
 .divisions button:hover { color: var(--text); border-color: #39415a; }
 .divisions button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.updated { margin: 0; color: var(--muted); font-size: 0.82rem; text-align: right; }
+.updated {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* live-update indicator */
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.live-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #3ddc84;
+  box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.5);
+  animation: live-pulse 2.4s ease-out infinite;
+}
+.live[data-state="error"] { color: #f5a524; }
+.live[data-state="error"] .live-dot { background: #f5a524; animation: none; }
+
+@keyframes live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.5); }
+  70%, 100% { box-shadow: 0 0 0 6px rgba(61, 220, 132, 0); }
+}
 
 .status { color: var(--muted); }
 .status.error { color: #ff9aa2; }
@@ -186,8 +223,12 @@ body {
 
 mark { background: rgba(230, 57, 70, 0.35); color: inherit; border-radius: 3px; padding: 0 2px; }
 
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
 @media (max-width: 640px) {
   .header-inner { justify-content: center; text-align: center; }
   .headline-stats { gap: 1rem; }
-  .updated { text-align: left; }
+  .updated { text-align: left; justify-content: flex-start; }
 }

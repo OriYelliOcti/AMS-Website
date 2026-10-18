@@ -1,7 +1,24 @@
 // Renders data/lineups.json, which the Discord bot publishes on every role change.
 // No framework, no build step: this file is served straight by GitHub Pages.
 
+// The page is English-only, so every generated string is pinned to an English
+// locale as well. Intl otherwise follows the visitor's browser locale and would
+// print "Updated 3時間前" or "hace 3 horas" for non-English visitors.
+const LOCALE = "en-GB";
+
+// How often to look for a freshly published lineups.json. The bot only rewrites
+// the file when a Discord role changes, so most polls come back identical and
+// the page is left exactly as it is (no flicker, no lost search box focus).
+const POLL_INTERVAL_MS = 30_000;
+const MAX_BACKOFF_MS = 5 * 60_000;
+
 const state = { data: null, query: "", division: "All" };
+
+let payloadText = null; // last payload rendered, used to detect real role changes
+let etag = null;        // validator of the last response, to skip unchanged downloads
+let pollTimer = null;
+let inFlight = false;
+let failures = 0;
 
 const $ = (id) => document.getElementById(id);
 
@@ -34,11 +51,17 @@ function relativeTime(iso) {
   const units = [["year", 31536000], ["month", 2592000], ["day", 86400], ["hour", 3600], ["minute", 60]];
   for (const [unit, size] of units) {
     if (Math.abs(seconds) >= size) {
-      return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
+      return new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto" })
         .format(Math.round(seconds / size), unit);
     }
   }
   return "just now";
+}
+
+function absoluteTime(iso) {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return "";
+  return then.toLocaleString(LOCALE, { dateStyle: "medium", timeStyle: "short" });
 }
 
 function matches(person, query) {
@@ -136,6 +159,14 @@ function render() {
     </article>`).join("");
 }
 
+function renderTimestamp(data) {
+  const exact = data.generated_at ? absoluteTime(data.generated_at) : "";
+  const stamp = data.generated_at ? relativeTime(data.generated_at) : "unknown";
+  $("updated").textContent = `Updated ${stamp}`;
+  $("updated").title = exact;
+  $("footer-updated").textContent = exact ? `last updated ${exact}` : "";
+}
+
 function renderHeader(data) {
   $("guild-name").textContent = data.guild?.name ?? "AMS";
   const totals = data.totals ?? {};
@@ -143,11 +174,7 @@ function renderHeader(data) {
     ["Teams", totals.teams], ["Rostered", totals.rostered], ["Divisions", totals.divisions],
   ].map(([label, value]) => `<div class="stat"><b>${value ?? 0}</b><span>${label}</span></div>`).join("");
 
-  const stamp = data.generated_at ? relativeTime(data.generated_at) : "unknown";
-  const exact = data.generated_at ? new Date(data.generated_at).toLocaleString() : "";
-  $("updated").textContent = `Updated ${stamp}`;
-  $("updated").title = exact;
-  $("footer-updated").textContent = exact ? `last updated ${exact}` : "";
+  renderTimestamp(data);
 }
 
 function renderNav(data) {
@@ -166,22 +193,89 @@ function renderNav(data) {
   });
 }
 
-async function load() {
-  try {
-    const response = await fetch(`data/lineups.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!data || data.schema === undefined) throw new Error("unexpected payload");
-    state.data = data;
-    renderHeader(data);
-    renderNav(data);
-    render();
-  } catch (error) {
-    $("status").textContent =
-      `Lineups are not available yet (${error.message}). The bot publishes them on the next role change.`;
-    $("status").classList.add("error");
-    $("guild-name").textContent = "AMS";
+function setLive(status) {
+  const live = $("live");
+  if (!live) return;
+  live.hidden = status === "off";
+  live.dataset.state = status;
+  $("live-text").textContent = status === "error" ? "Reconnecting…" : "Live";
+  live.title = status === "error"
+    ? "Could not reach the lineup feed — retrying automatically."
+    : `Checking for role changes every ${Math.round(POLL_INTERVAL_MS / 1000)} seconds.`;
+}
+
+// Swap in a newly published payload. Only called when the file's contents really
+// changed, which in practice means a Discord role changed.
+function applyPayload(text) {
+  const data = JSON.parse(text);
+  if (!data || data.schema === undefined) throw new Error("unexpected payload");
+  payloadText = text;
+  state.data = data;
+
+  // A division can disappear between publishes; never leave a dead filter selected.
+  if (state.division !== "All" && !(data.divisions ?? []).some((d) => d.name === state.division)) {
+    state.division = "All";
   }
+
+  renderHeader(data);
+  renderNav(data);
+  render();
+}
+
+function showLoadError(error) {
+  $("status").textContent =
+    `Lineups are not available yet (${error.message}). The bot publishes them on the next role change.`;
+  $("status").classList.add("error");
+  $("guild-name").textContent = "AMS";
+}
+
+async function refresh() {
+  if (inFlight) return;
+  inFlight = true;
+  try {
+    // Only revalidate once we have something rendered to keep.
+    const headers = etag && state.data ? { "If-None-Match": etag } : {};
+    const response = await fetch(`data/lineups.json?t=${Date.now()}`, { cache: "no-store", headers });
+
+    if (response.status === 304) {
+      failures = 0;
+      if (state.data) {
+        renderTimestamp(state.data);
+        setLive("live");
+      }
+      return;
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    etag = response.headers.get("etag") ?? etag;
+
+    if (!state.data || text !== payloadText) {
+      applyPayload(text); // the only place the page re-renders on its own
+    } else {
+      renderTimestamp(state.data); // keep "Updated 4 minutes ago" honest
+    }
+
+    failures = 0;
+    setLive("live");
+  } catch (error) {
+    failures += 1;
+    if (!state.data) showLoadError(error);
+    else setLive("error");
+    console.warn("Lineup refresh failed:", error);
+  } finally {
+    inFlight = false;
+    schedulePoll();
+  }
+}
+
+function schedulePoll() {
+  clearTimeout(pollTimer);
+  if (document.hidden) return; // no point polling a tab nobody is looking at
+  const delay = failures
+    ? Math.min(POLL_INTERVAL_MS * 2 ** failures, MAX_BACKOFF_MS)
+    : POLL_INTERVAL_MS;
+  pollTimer = setTimeout(refresh, delay);
 }
 
 $("search").addEventListener("input", (event) => {
@@ -189,4 +283,17 @@ $("search").addEventListener("input", (event) => {
   render();
 });
 
-load();
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    clearTimeout(pollTimer);
+  } else if (state.data) {
+    clearTimeout(pollTimer);
+    refresh(); // catch up immediately when the tab comes back
+  }
+});
+
+window.addEventListener("online", () => {
+  if (state.data) refresh();
+});
+
+refresh();
