@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMS Lineups</title>
+<meta name="description" content="Live team lineups for the AMS racing series, generated automatically from Discord roles.">
+<meta property="og:title" content="AMS Lineups">
+<meta property="og:description" content="Live team lineups for the AMS racing series.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <span class="brand-mark">🏁</span>
+      <div>
+        <h1>Lineups</h1>
+        <p class="brand-sub" id="guild-name">Loading…</p>
+      </div>
+    </div>
+    <div class="headline-stats" id="totals"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <label class="search">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="search" placeholder="Search driver, team or username…" autocomplete="off" spellcheck="false">
+    </label>
+    <nav class="divisions" id="division-nav" aria-label="Divisions"></nav>
+    <p class="updated" id="updated"></p>
+  </div>
+
+  <p class="status" id="status">Loading lineups…</p>
+  <main id="lineups"></main>
+
+  <section class="officials" id="officials-section" hidden>
+    <h2>Race officials</h2>
+    <div class="officials-grid" id="officials"></div>
+  </section>
+
+  <footer class="site-footer">
+    <p>
+      Generated from Discord roles — changed roles appear here automatically.
+      Data is published by the AMS bot; <span id="footer-updated"></span>
+    </p>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
