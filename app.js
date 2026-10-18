@@ -9,8 +9,9 @@ const LOCALE = "en-GB";
 // How often to look for a freshly published lineups.json. The bot only rewrites
 // the file when a Discord role changes, so most polls come back identical and
 // the page is left exactly as it is (no flicker, no lost search box focus).
-const POLL_INTERVAL_MS = 30_000;
-const MAX_BACKOFF_MS = 5 * 60_000;
+const POLL_INTERVAL_MS = 5 * 60 * 60_000; // every 5 hours
+// A failed check retries on its own schedule, backing off up to the normal cadence.
+const RETRY_INTERVAL_MS = 5 * 60_000;
 
 const state = { data: null, query: "", division: "All" };
 
@@ -19,6 +20,7 @@ let etag = null;        // validator of the last response, to skip unchanged dow
 let pollTimer = null;
 let inFlight = false;
 let failures = 0;
+let lastCheckedAt = 0; // when the last check finished, so a hidden tab can catch up
 
 const $ = (id) => document.getElementById(id);
 
@@ -159,6 +161,13 @@ function render() {
     </article>`).join("");
 }
 
+function intervalLabel(ms) {
+  const hours = ms / 3_600_000;
+  if (Number.isInteger(hours)) return `${hours} hour${hours === 1 ? "" : "s"}`;
+  const minutes = Math.round(ms / 60_000);
+  return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+}
+
 function renderTimestamp(data) {
   const exact = data.generated_at ? absoluteTime(data.generated_at) : "";
   const stamp = data.generated_at ? relativeTime(data.generated_at) : "unknown";
@@ -201,7 +210,7 @@ function setLive(status) {
   $("live-text").textContent = status === "error" ? "Reconnecting…" : "Live";
   live.title = status === "error"
     ? "Could not reach the lineup feed — retrying automatically."
-    : `Checking for role changes every ${Math.round(POLL_INTERVAL_MS / 1000)} seconds.`;
+    : `Checking for role changes every ${intervalLabel(POLL_INTERVAL_MS)}.`;
 }
 
 // Swap in a newly published payload. Only called when the file's contents really
@@ -265,17 +274,22 @@ async function refresh() {
     console.warn("Lineup refresh failed:", error);
   } finally {
     inFlight = false;
+    lastCheckedAt = Date.now();
     schedulePoll();
   }
 }
 
 function schedulePoll() {
   clearTimeout(pollTimer);
+  pollTimer = null;
   if (document.hidden) return; // no point polling a tab nobody is looking at
-  const delay = failures
-    ? Math.min(POLL_INTERVAL_MS * 2 ** failures, MAX_BACKOFF_MS)
+
+  const cadence = failures
+    ? Math.min(RETRY_INTERVAL_MS * 2 ** (failures - 1), POLL_INTERVAL_MS)
     : POLL_INTERVAL_MS;
-  pollTimer = setTimeout(refresh, delay);
+  // A check that already happened still counts towards the cadence.
+  const remaining = Math.max(0, cadence - (Date.now() - lastCheckedAt));
+  pollTimer = setTimeout(refresh, remaining);
 }
 
 $("search").addEventListener("input", (event) => {
@@ -286,11 +300,23 @@ $("search").addEventListener("input", (event) => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     clearTimeout(pollTimer);
-  } else if (state.data) {
+    pollTimer = null;
+    return;
+  }
+  if (!state.data) return;
+
+  // Only catch up once the cadence is actually due; otherwise re-arm the rest.
+  const due = Date.now() - lastCheckedAt >= (failures ? RETRY_INTERVAL_MS : POLL_INTERVAL_MS);
+  if (due) {
     clearTimeout(pollTimer);
-    refresh(); // catch up immediately when the tab comes back
+    refresh();
+  } else {
+    schedulePoll();
   }
 });
+
+const refreshEvery = $("refresh-every");
+if (refreshEvery) refreshEvery.textContent = intervalLabel(POLL_INTERVAL_MS);
 
 window.addEventListener("online", () => {
   if (state.data) refresh();
