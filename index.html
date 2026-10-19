@@ -7,114 +7,146 @@
 <meta name="description" content="AMS is a Roblox racing league with a real ladder: F1, F2, F3 and GT3, contracts, stewards and a live roster generated from Discord roles.">
 <meta property="og:title" content="AMS — Apex Motorsport Series">
 <meta property="og:description" content="A Roblox racing league with a real ladder — F1, F2, F3 and GT3.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏁</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23111210'/><rect x='3' y='5' width='10' height='2' fill='%23d0212b'/><rect x='3' y='9' width='6' height='2' fill='%23f2f1ec'/></svg>">
 </head>
 <body>
 
-<nav class="topnav" aria-label="Sections">
-  <div class="wrap topnav-inner">
-    <a class="topnav-brand" href="#top">✧ AMS</a>
-    <div class="topnav-links">
-      <a href="#about">About</a>
-      <a href="#features">What we have</a>
-      <a href="#grid">Grid</a>
-      <a href="#calendar">Calendar</a>
-      <a href="#rules">Rules</a>
-      <a href="#join">Join</a>
-      <a href="#roster">Lineups</a>
-    </div>
-  </div>
-</nav>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="hero" id="top">
-  <div class="wrap hero-inner">
-    <p class="hero-eyebrow" id="hero-eyebrow">Roblox motorsport · Season 1</p>
-    <h1 class="hero-headline" id="hero-headline">Apex Motorsport Series</h1>
-    <p class="hero-sub" id="hero-sub">
-      A structured racing league with a real ladder — F1, F2, F3 and GT3 — run with contracts,
-      stewards and a live roster that updates itself.
-    </p>
-    <p class="hero-actions">
-      <a class="btn btn-primary" id="hero-primary" href="#roster">See the grid</a>
-      <a class="btn" id="hero-secondary" href="#join">How to join</a>
-    </p>
-    <div class="hero-stats" id="hero-stats"></div>
+<header class="masthead">
+  <div class="shell masthead-inner">
+    <p class="mast-id"><span class="mark" aria-hidden="true"></span>AMS<span class="sep">/</span>Apex Motorsport Series</p>
+    <p class="mast-meta">Season 1 · 2026<span class="sep">/</span><a href="#roster">Live lineups &darr;</a></p>
   </div>
 </header>
 
-<main class="wrap home">
-  <section class="block" id="about">
-    <h2 id="about-title">Who are we?</h2>
-    <div class="prose" id="about-body"></div>
+<main id="main">
+
+  <section class="hero shell">
+    <div class="hero-copy">
+      <p class="kicker" id="hero-eyebrow">Roblox motorsport — Season 1</p>
+      <h1 class="display" id="hero-headline">Apex Motorsport Series</h1>
+      <p class="deck" id="hero-sub"></p>
+      <p class="hero-actions">
+        <a class="action action-solid" id="hero-primary" href="#roster">See the grid</a>
+        <a class="action" id="hero-secondary" href="#join">How to join</a>
+      </p>
+    </div>
+    <aside class="board" aria-label="League at a glance">
+      <p class="board-label">At a glance</p>
+      <div id="hero-stats"></div>
+      <p class="board-foot">Counted from Discord roles</p>
+    </aside>
   </section>
 
-  <section class="block" id="features">
-    <h2 id="features-title">What we have</h2>
-    <p class="lede" id="features-intro"></p>
-    <div class="cards" id="features-list"></div>
+  <section class="section shell" id="about">
+    <div class="section-head">
+      <p class="kicker">01 — Identity</p>
+      <h2 id="about-title">Who are we?</h2>
+    </div>
+    <div class="section-body prose" id="about-body"></div>
   </section>
 
-  <section class="block" id="grid">
-    <h2 id="grid-title">The grid</h2>
-    <p class="lede" id="grid-intro"></p>
+  <section class="section shell" id="features">
+    <div class="section-head">
+      <p class="kicker">02 — Programme</p>
+      <h2 id="features-title">What we have</h2>
+      <p class="lede" id="features-intro"></p>
+    </div>
+    <ol class="index" id="features-list"></ol>
+  </section>
+
+  <section class="section shell" id="grid">
+    <div class="section-head">
+      <p class="kicker">03 — Entries</p>
+      <h2 id="grid-title">The grid</h2>
+      <p class="lede" id="grid-intro"></p>
+    </div>
     <div class="table-wrap">
-      <table class="data-table">
-        <thead><tr><th>Division</th><th>Teams</th><th>Grid slots used</th><th>Notes</th></tr></thead>
+      <table class="sheet">
+        <thead>
+          <tr>
+            <th scope="col">Division</th>
+            <th scope="col" class="right">Teams</th>
+            <th scope="col" class="right">Slots used</th>
+            <th scope="col">Notes</th>
+          </tr>
+        </thead>
         <tbody id="grid-rows"></tbody>
       </table>
     </div>
-    <p class="note" id="grid-note"></p>
+    <p class="footnote" id="grid-note"></p>
   </section>
 
-  <section class="block" id="calendar">
-    <h2 id="calendar-title">Season 1 calendar</h2>
-    <p class="lede" id="calendar-intro"></p>
+  <section class="section shell" id="calendar">
+    <div class="section-head">
+      <p class="kicker">04 — Schedule</p>
+      <h2 id="calendar-title">Season 1 calendar</h2>
+      <p class="lede" id="calendar-intro"></p>
+    </div>
     <div class="table-wrap">
-      <table class="data-table">
-        <thead><tr><th>Round</th><th>Circuit</th><th>Laps</th><th>Pit window</th></tr></thead>
+      <table class="sheet">
+        <thead>
+          <tr>
+            <th scope="col" class="right">Rd</th>
+            <th scope="col">Circuit</th>
+            <th scope="col">Country</th>
+            <th scope="col" class="right">Laps</th>
+            <th scope="col" class="right">Pit window</th>
+          </tr>
+        </thead>
         <tbody id="calendar-rows"></tbody>
       </table>
     </div>
   </section>
 
-  <section class="block" id="rules">
-    <h2 id="rules-title">The rules, in short</h2>
-    <p class="lede" id="rules-intro"></p>
+  <section class="section shell" id="rules">
+    <div class="section-head">
+      <p class="kicker">05 — Conduct</p>
+      <h2 id="rules-title">The rules, in short</h2>
+      <p class="lede" id="rules-intro"></p>
+    </div>
     <ol class="rules" id="rules-list"></ol>
   </section>
 
-  <section class="block" id="join">
-    <h2 id="join-title">How to join</h2>
+  <section class="section shell" id="join">
+    <div class="section-head">
+      <p class="kicker">06 — Entry</p>
+      <h2 id="join-title">How to join</h2>
+    </div>
     <ol class="steps" id="join-steps"></ol>
-    <p class="note" id="join-invite"></p>
+    <p class="footnote" id="join-invite"></p>
   </section>
 
-  <section class="block" id="faq">
-    <h2 id="faq-title">Questions</h2>
+  <section class="section shell" id="faq">
+    <div class="section-head">
+      <p class="kicker">07 — Questions</p>
+      <h2 id="faq-title">Questions</h2>
+    </div>
     <div class="faq" id="faq-list"></div>
   </section>
+
 </main>
 
-<section class="lineups" id="roster">
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <div class="brand">
-        <span class="brand-mark">🏁</span>
-        <div>
-          <h2>Live lineups</h2>
-          <p class="brand-sub" id="guild-name">Loading…</p>
-        </div>
-      </div>
-      <div class="headline-stats" id="totals"></div>
+<section class="roster" id="roster">
+  <div class="shell roster-head">
+    <div>
+      <p class="kicker">08 — Timing sheet</p>
+      <h2>Live lineups</h2>
+      <p class="roster-sub" id="guild-name">Loading…</p>
     </div>
-  </header>
+    <div class="headline-stats" id="totals"></div>
+  </div>
 
-  <div class="wrap">
+  <div class="shell">
     <div class="toolbar">
       <label class="search">
-        <span class="search-icon">🔍</span>
-        <input type="search" id="search" placeholder="Search driver, team or username…" autocomplete="off" spellcheck="false">
+        <span class="search-icon" aria-hidden="true">/</span>
+        <input type="search" id="search" placeholder="Search driver, team or username" autocomplete="off" spellcheck="false" aria-label="Search lineups">
       </label>
       <nav class="divisions" id="division-nav" aria-label="Divisions"></nav>
       <p class="updated">
@@ -129,18 +161,21 @@
     <main id="lineups"></main>
 
     <section class="officials" id="officials-section" hidden>
-      <h2>Race officials</h2>
+      <h3>Race officials</h3>
       <div class="officials-grid" id="officials"></div>
     </section>
   </div>
 </section>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <p id="site-footer-text">Built and run by the AMS staff team. Lineups update automatically from Discord roles.</p>
-    <p>
-      Generated from Discord roles — this page checks for role changes every <span id="refresh-every">5 hours</span>.
-      Data is published by the AMS bot; <span id="footer-updated"></span>
+<footer class="colophon">
+  <div class="shell colophon-inner">
+    <div>
+      <p class="mast-id"><span class="mark" aria-hidden="true"></span>AMS<span class="sep">/</span>Apex Motorsport Series</p>
+      <p id="site-footer-text">Built and run by the AMS staff team. Lineups update automatically from Discord roles.</p>
+    </div>
+    <p class="colophon-meta">
+      Lineups checked every <span id="refresh-every">5 hours</span> ·
+      <span id="footer-updated"></span>
     </p>
   </div>
 </footer>
