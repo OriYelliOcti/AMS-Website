@@ -343,7 +343,7 @@ async function publish() {
   }
 
   render(parsed);
-  setStatus(`Published. Pages will serve it in under a minute. ${put.body?.commit?.sha?.slice(0, 7) ?? ""}`, "ok");
+  setStatus(`Published (${put.body?.commit?.sha?.slice(0, 7) ?? "commit ok"}). GitHub Pages can take up to 10 minutes to serve it everywhere.`, "ok");
 }
 
 function openPanel() {
