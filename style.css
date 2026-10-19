@@ -95,7 +95,14 @@ a { color: inherit; }
 .mast-meta { color: var(--muted); justify-content: flex-end; }
 .mast-meta a { text-decoration: none; border-bottom: 1px solid var(--rule); }
 .mast-meta a:hover { border-color: var(--red); color: var(--fg); }
-.mark { width: 10px; height: 10px; background: var(--red); display: inline-block; flex: 0 0 auto; }
+/* The wordmark is an image, so each theme gets its own file: ink letters on
+   paper, paper letters in the dark. Both keep the brand red slash. */
+.brand { text-decoration: none; }
+.brand-logo { height: 17px; width: auto; display: block; flex: 0 0 auto; }
+.brand-logo-dark { display: none; }
+[data-theme="dark"] .brand-logo { display: none; }
+[data-theme="dark"] .brand-logo-dark { display: block; }
+.brand-suffix { display: inline-flex; align-items: center; gap: 8px; }
 
 .mast-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
