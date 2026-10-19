@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>AMS — Apex Motorsport Series</title>
 <meta name="description" content="AMS is a Roblox racing league with a real ladder: F1, F2, F3 and GT3, contracts, stewards and a live roster generated from Discord roles.">
 <meta property="og:title" content="AMS — Apex Motorsport Series">
@@ -11,6 +12,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
+<script>
+  // Set the theme before first paint so the page never flashes the wrong background.
+  (function () {
+    try {
+      var saved = localStorage.getItem("ams.theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.theme =
+        saved === "dark" || saved === "light" ? saved : (prefersDark ? "dark" : "light");
+    } catch (error) {
+      document.documentElement.dataset.theme = "light";
+    }
+  })();
+</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23111210'/><rect x='3' y='5' width='10' height='2' fill='%23d0212b'/><rect x='3' y='9' width='6' height='2' fill='%23f2f1ec'/></svg>">
 </head>
 <body>
@@ -20,7 +34,12 @@
 <header class="masthead">
   <div class="shell masthead-inner">
     <p class="mast-id"><span class="mark" aria-hidden="true"></span>AMS<span class="sep">/</span>Apex Motorsport Series</p>
-    <p class="mast-meta">Season 1 · 2026<span class="sep">/</span><a href="#roster">Live lineups &darr;</a></p>
+    <div class="mast-right">
+      <p class="mast-meta">Season 1 · 2026<span class="sep">/</span><a href="#roster">Live lineups &darr;</a></p>
+      <button class="theme" id="theme-toggle" type="button" aria-label="Switch colour theme">
+        <span class="theme-swatch" aria-hidden="true"></span><span id="theme-label">Light</span>
+      </button>
+    </div>
   </div>
 </header>
 
