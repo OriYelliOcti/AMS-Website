@@ -400,6 +400,44 @@ window.addEventListener("hashchange", () => {
   if (location.hash === ADMIN_HASH) openPanel();
 });
 
+/* ------------------------------------------------------------------- theme */
+
+const THEME_KEY = "ams.theme";
+
+function currentTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+function applyTheme(theme, persist) {
+  document.documentElement.dataset.theme = theme;
+  if (persist) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (error) { /* private mode */ }
+  }
+  const label = $id("theme-label");
+  if (label) label.textContent = theme === "dark" ? "Dark" : "Light";
+  const button = $id("theme-toggle");
+  if (button) {
+    button.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    button.setAttribute("aria-pressed", String(theme === "dark"));
+  }
+}
+
+function initTheme() {
+  applyTheme(currentTheme(), false);
+  $id("theme-toggle")?.addEventListener("click", () => {
+    applyTheme(currentTheme() === "dark" ? "light" : "dark", true);
+  });
+
+  // Follow the system only while the visitor has not chosen a theme themselves.
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", (event) => {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (error) { /* ignore */ }
+    if (!saved) applyTheme(event.matches ? "dark" : "light", false);
+  });
+}
+
 loadContent();
+initTheme();
 if (location.hash === ADMIN_HASH) openPanel();
 })();
