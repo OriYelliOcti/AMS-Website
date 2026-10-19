@@ -22,6 +22,8 @@ function esc(value) {
 }
 
 let content = null;
+let contentPromise = null;
+let contentLoaded = false;
 
 /* ------------------------------------------------------------------ render */
 
@@ -170,18 +172,24 @@ function render(data) {
   renderFooter(data.footer);
 }
 
-async function loadContent() {
-  try {
-    const response = await fetch(`${CONTENT_URL}?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    render(await response.json());
-  } catch (error) {
-    console.warn("Homepage content could not be loaded:", error);
-    const note = $id("about-body");
-    if (note) {
-      note.innerHTML = '<p>The homepage copy could not be loaded. The live lineups below are unaffected.</p>';
+function loadContent() {
+  contentPromise = (async () => {
+    try {
+      const response = await fetch(`${CONTENT_URL}?t=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      render(await response.json());
+      contentLoaded = true;
+    } catch (error) {
+      console.warn("Homepage content could not be loaded:", error);
+      const note = $id("about-body");
+      if (note) {
+        note.innerHTML = '<p>The homepage copy could not be loaded. The live lineups below are unaffected.</p>';
+      }
+      contentLoaded = false;
     }
-  }
+    return contentLoaded;
+  })();
+  return contentPromise;
 }
 
 /* ------------------------------------------------------------- admin console */
@@ -230,7 +238,12 @@ function buildPanel() {
   $id("ams-token").value = token;
   $id("ams-token").addEventListener("input", (event) => { token = event.target.value.trim(); });
   $id("ams-verify").addEventListener("click", () => verifyToken(true));
-  $id("ams-reload").addEventListener("click", () => fillEditor(content));
+  $id("ams-reload").addEventListener("click", async () => {
+    setStatus("Reloading from the server…");
+    const ok = await loadContent();
+    fillEditor(ok ? content : {});
+    setStatus(ok ? "Reloaded the published content." : "Could not reload — keeping what is on screen.", ok ? "ok" : "err");
+  });
   $id("ams-format").addEventListener("click", formatEditor);
   $id("ams-publish").addEventListener("click", publish);
   return panel;
@@ -346,12 +359,22 @@ async function publish() {
   setStatus(`Published (${put.body?.commit?.sha?.slice(0, 7) ?? "commit ok"}). GitHub Pages can take up to 10 minutes to serve it everywhere.`, "ok");
 }
 
-function openPanel() {
+async function openPanel() {
   buildPanel().hidden = false;
-  fillEditor(content);
   document.addEventListener("keydown", onPanelKey);
   if (token) verifyToken(false);
   $id("ams-token")?.focus();
+
+  // Opening straight onto #ams-admin races the initial fetch; wait for it rather
+  // than showing an empty editor.
+  if (!contentLoaded) {
+    const box = $id("ams-json");
+    if (box && !box.value.trim()) box.placeholder = "Loading the published content…";
+    await (contentPromise ?? loadContent());
+  }
+  const box = $id("ams-json");
+  if (box) box.placeholder = "";
+  fillEditor(content ?? {});
 }
 
 function closePanel() {
