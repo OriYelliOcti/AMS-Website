@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-19T09:47:04+00:00",
+ "generated_at": "2026-10-19T12:41:09+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -890,11 +890,6 @@
     {
      "name": "Dream | FIA | 🇦🇺 | SEC",
      "username": "dreamneedsadog",
-     "bot": false
-    },
-    {
-     "name": "KB | FIA | 🇮🇳 | F1 | SC",
-     "username": "kingbhuvanplayz",
      "bot": false
     },
     {
