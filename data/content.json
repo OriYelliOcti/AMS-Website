@@ -1,247 +1,247 @@
 {
-  "schema": 1,
-  "updated": "2026-10-19",
-  "hero": {
-    "eyebrow": "Roblox motorsport · Season 1",
-    "headline": "Apex Motorsport Series",
-    "subhead": "A structured racing league with a real ladder — F1, F2, F3 and GT3 — run with contracts, stewards and a live roster that updates itself.",
-    "primary": {
-      "label": "See the grid",
-      "href": "#lineups"
-    },
-    "secondary": {
-      "label": "How to join",
-      "href": "#join"
-    }
+ "schema": 1,
+ "updated": "2026-10-19",
+ "hero": {
+  "eyebrow": "Roblox motorsport · Season 1",
+  "headline": "Apex Motorsport Series",
+  "subhead": "A structured racing league with a real ladder — F1, F2, F3 and GT3 — run with contracts, stewards and a live roster that updates itself.",
+  "primary": {
+   "label": "See the grid",
+   "href": "#lineups"
   },
-  "about": {
-    "title": "Who are we?",
-    "paragraphs": [
-      "AMS — the Apex Motorsport Series — is a Roblox racing league built like a real motorsport series rather than a pickup lobby. Drivers race in FR26 (Formula 2026 Racing) and GTM across four divisions, and every seat is a real role: sign with a team, hold a number, and your name appears on the live lineups below.",
-      "The league runs a ladder. F3 and F2 exist so new drivers have somewhere to learn without being thrown straight into a championship fight, and race control means results are decided by stewards reading incidents — not by who shouted loudest.",
-      "What started in July 2026 is now 226 members, 41 team entries across four divisions, and a calendar with mandatory pit stops and defined pit windows."
-    ],
-    "stats": [
-      {
-        "value": "226",
-        "label": "members"
-      },
-      {
-        "value": "41",
-        "label": "team entries"
-      },
-      {
-        "value": "4",
-        "label": "divisions"
-      },
-      {
-        "value": "48",
-        "label": "rostered drivers"
-      }
-    ]
-  },
-  "features": {
-    "title": "What we have",
-    "intro": "Everything that makes a season feel like a season, not a series of lobbies.",
-    "items": [
-      {
-        "icon": "🏁",
-        "title": "A four-tier grid",
-        "text": "F1, F2, F3 and GT3 — 41 team entries between them, with an F4 division prepared for next season."
-      },
-      {
-        "icon": "🗃️",
-        "title": "Real contracts",
-        "text": "Every signing is logged with division, team, role and contract length (maximum two seasons). Free agents are visible to every team owner."
-      },
-      {
-        "icon": "🕒",
-        "title": "Race weekend structure",
-        "text": "Each round has a briefing: lap count, one mandatory stop, and a numbered pit window."
-      },
-      {
-        "icon": "🧑‍⚖️",
-        "title": "Race control and stewarding",
-        "text": "A president, directors, assistants and stewards, plus a safety car driver. Incidents are protested and judged, not argued out in chat."
-      },
-      {
-        "icon": "📊",
-        "title": "Live lineups",
-        "text": "This page reads the same file the bot publishes whenever a role changes, so the roster on screen is the roster on the grid."
-      },
-      {
-        "icon": "🟪",
-        "title": "Lap-time boards",
-        "text": "A forum of verified times per circuit — the league's own benchmark rather than a guess."
-      },
-      {
-        "icon": "🛠️",
-        "title": "Team garages",
-        "text": "Each team gets a private HQ, livery space and a contract area inside the server."
-      },
-      {
-        "icon": "🎤",
-        "title": "Staff and media paths",
-        "text": "Moderation applications are reviewed weekly, alongside media, graphics and commentary roles."
-      }
-    ]
-  },
-  "divisions": {
-    "title": "The grid",
-    "intro": "Four divisions, one ladder. Grid slots are counted from the server's own team roles.",
-    "items": [
-      {
-        "name": "F1",
-        "teams": 12,
-        "slots": 26,
-        "note": "The headline championship"
-      },
-      {
-        "name": "F2",
-        "teams": 10,
-        "slots": 18,
-        "note": "The main feeder series"
-      },
-      {
-        "name": "F3",
-        "teams": 9,
-        "slots": 3,
-        "note": "Entry level, wide open"
-      },
-      {
-        "name": "GT3",
-        "teams": 10,
-        "slots": 13,
-        "note": "GT machinery alongside the single-seaters"
-      },
-      {
-        "name": "F4",
-        "teams": 0,
-        "slots": 0,
-        "note": "Prepared for next season"
-      }
-    ],
-    "note": "F3 is the easiest place to start: nine teams and plenty of open seats."
-  },
-  "calendar": {
-    "title": "Season 1 calendar",
-    "intro": "Every round runs to one mandatory stop inside a published pit window.",
-    "rounds": [
-      {
-        "round": 1,
-        "flag": "🇮🇹",
-        "circuit": "Monza",
-        "laps": 21,
-        "window": "8–14"
-      },
-      {
-        "round": 2,
-        "flag": "🇩🇪",
-        "circuit": "Hockenheimring",
-        "laps": 19,
-        "window": "6–12"
-      },
-      {
-        "round": 3,
-        "flag": "🇦🇿",
-        "circuit": "Baku",
-        "laps": 23,
-        "window": "7–13"
-      },
-      {
-        "round": 4,
-        "flag": "🇧🇪",
-        "circuit": "Spa-Francorchamps",
-        "laps": 19,
-        "window": "6–12"
-      },
-      {
-        "round": 5,
-        "flag": "🇶🇦",
-        "circuit": "Lusail",
-        "laps": 23,
-        "window": "9–15"
-      },
-      {
-        "round": 6,
-        "flag": "🇺🇸",
-        "circuit": "Circuit of the Americas",
-        "laps": 22,
-        "window": "7–13"
-      },
-      {
-        "round": 7,
-        "flag": "🇲🇽",
-        "circuit": "Hermanos Rodríguez",
-        "laps": 25,
-        "window": "9–15"
-      }
-    ]
-  },
-  "rules": {
-    "title": "The rules, in short",
-    "intro": "The full rules live in the server. These are the five that get you removed.",
-    "items": [
-      "No racism — including slurs in text, stickers or GIFs, and anything targeting skin colour or nationality.",
-      "Respect the staff — they run the league.",
-      "Use channels for their purpose — fun-race talk belongs in the fun-race channel.",
-      "No NSFW — instant ban.",
-      "No doxxing — no addresses, names, faces or private information."
-    ]
-  },
-  "join": {
-    "title": "How to join",
-    "steps": [
-      {
-        "title": "Join the Discord",
-        "text": "Everything happens there: signings, race briefings, stewarding and the lap-time boards."
-      },
-      {
-        "title": "Verify",
-        "text": "Verification links your Roblox username to your Discord name so teams know who they are signing."
-      },
-      {
-        "title": "Get on the grid",
-        "text": "Pick a division, talk to team owners, or list yourself as a free agent. Contracts are signed publicly with team, role, length and nationality."
-      },
-      {
-        "title": "Prefer the paddock?",
-        "text": "Moderation, media, graphics and stewarding roles are open, with applications reviewed every Thursday."
-      }
-    ],
-    "invite": "",
-    "inviteNote": "Ask any staff member for the current invite link."
-  },
-  "faq": {
-    "title": "Questions",
-    "items": [
-      {
-        "q": "Do I need a powerful PC?",
-        "a": "No. Everything runs on Roblox, in FR26 (Formula 2026 Racing) and GTM."
-      },
-      {
-        "q": "I've never raced in a league before. Can I still join?",
-        "a": "Yes. F3 is deliberately the entry tier and F4 is being prepared, so most of the grid has room for new drivers."
-      },
-      {
-        "q": "Can I own a team?",
-        "a": "Yes — there are free team owner and team principal roles, and existing teams recruit throughout the season."
-      },
-      {
-        "q": "How are incidents handled?",
-        "a": "There is an incidents forum. Stewards review each report, and only race officials can issue penalties — anything a session host decides is provisional."
-      },
-      {
-        "q": "How long do contracts last?",
-        "a": "A maximum of two seasons, logged publicly in the signings channel."
-      },
-      {
-        "q": "Which regions play here?",
-        "a": "The server has Europe and Asia roles and runs in English."
-      }
-    ]
-  },
-  "footer": {
-    "text": "Built and run by the AMS staff team. Lineups update automatically from Discord roles."
+  "secondary": {
+   "label": "How to join",
+   "href": "#join"
   }
+ },
+ "about": {
+  "title": "Who are we?",
+  "paragraphs": [
+   "AMS — the Apex Motorsport Series — is a Roblox racing league built like a real motorsport series rather than a pickup lobby. Drivers race in FR26 (Formula 2026 Racing) and GTM across four divisions, and every seat is a real role: sign with a team, hold a number, and your name appears on the live lineups below.",
+   "The league runs a ladder. F3 and F2 exist so new drivers have somewhere to learn without being thrown straight into a championship fight, and race control means results are decided by stewards reading incidents — not by who shouted loudest.",
+   "What started in July 2026 is now 226 members, 41 team entries across four divisions, and a calendar with mandatory pit stops and defined pit windows."
+  ],
+  "stats": [
+   {
+    "value": "226",
+    "label": "members"
+   },
+   {
+    "value": "41",
+    "label": "team entries"
+   },
+   {
+    "value": "4",
+    "label": "divisions"
+   },
+   {
+    "value": "48",
+    "label": "rostered drivers"
+   }
+  ]
+ },
+ "features": {
+  "title": "What we have",
+  "intro": "Everything that makes a season feel like a season, not a series of lobbies.",
+  "items": [
+   {
+    "icon": "🏁",
+    "title": "A four-tier grid",
+    "text": "F1, F2, F3 and GT3 — 41 team entries between them, with an F4 division prepared for next season."
+   },
+   {
+    "icon": "🗃️",
+    "title": "Real contracts",
+    "text": "Every signing is logged with division, team, role and contract length (maximum two seasons). Free agents are visible to every team owner."
+   },
+   {
+    "icon": "🕒",
+    "title": "Race weekend structure",
+    "text": "Each round has a briefing: lap count, one mandatory stop, and a numbered pit window."
+   },
+   {
+    "icon": "🧑‍⚖️",
+    "title": "Race control and stewarding",
+    "text": "A president, directors, assistants and stewards, plus a safety car driver. Incidents are protested and judged, not argued out in chat."
+   },
+   {
+    "icon": "📊",
+    "title": "Live lineups",
+    "text": "This page reads the same file the bot publishes whenever a role changes, so the roster on screen is the roster on the grid."
+   },
+   {
+    "icon": "🟪",
+    "title": "Lap-time boards",
+    "text": "A forum of verified times per circuit — the league's own benchmark rather than a guess."
+   },
+   {
+    "icon": "🛠️",
+    "title": "Team garages",
+    "text": "Each team gets a private HQ, livery space and a contract area inside the server."
+   },
+   {
+    "icon": "🎤",
+    "title": "Staff and media paths",
+    "text": "Moderation applications are reviewed weekly, alongside media, graphics and commentary roles."
+   }
+  ]
+ },
+ "divisions": {
+  "title": "The grid",
+  "intro": "Four divisions, one ladder. Grid slots are counted from the server's own team roles.",
+  "items": [
+   {
+    "name": "F1",
+    "teams": 12,
+    "slots": 26,
+    "note": "The headline championship"
+   },
+   {
+    "name": "F2",
+    "teams": 10,
+    "slots": 18,
+    "note": "The main feeder series"
+   },
+   {
+    "name": "F3",
+    "teams": 9,
+    "slots": 3,
+    "note": "Entry level, wide open"
+   },
+   {
+    "name": "GT3",
+    "teams": 10,
+    "slots": 13,
+    "note": "GT machinery alongside the single-seaters"
+   },
+   {
+    "name": "F4",
+    "teams": 0,
+    "slots": 0,
+    "note": "Prepared for next season"
+   }
+  ],
+  "note": "F3 is the easiest place to start: nine teams and plenty of open seats."
+ },
+ "calendar": {
+  "title": "Season 1 calendar",
+  "intro": "Every round runs to one mandatory stop inside a published pit window.",
+  "rounds": [
+   {
+    "round": 1,
+    "flag": "🇮🇹",
+    "circuit": "Monza",
+    "laps": 21,
+    "window": "8–14"
+   },
+   {
+    "round": 2,
+    "flag": "🇩🇪",
+    "circuit": "Hockenheimring",
+    "laps": 19,
+    "window": "6–12"
+   },
+   {
+    "round": 3,
+    "flag": "🇦🇿",
+    "circuit": "Baku",
+    "laps": 23,
+    "window": "7–13"
+   },
+   {
+    "round": 4,
+    "flag": "🇧🇪",
+    "circuit": "Spa-Francorchamps",
+    "laps": 19,
+    "window": "6–12"
+   },
+   {
+    "round": 5,
+    "flag": "🇶🇦",
+    "circuit": "Lusail",
+    "laps": 23,
+    "window": "9–15"
+   },
+   {
+    "round": 6,
+    "flag": "🇺🇸",
+    "circuit": "Circuit of the Americas",
+    "laps": 22,
+    "window": "7–13"
+   },
+   {
+    "round": 7,
+    "flag": "🇲🇽",
+    "circuit": "Hermanos Rodríguez",
+    "laps": 25,
+    "window": "9–15"
+   }
+  ]
+ },
+ "rules": {
+  "title": "The rules, in short",
+  "intro": "The full rules live in the server. These are the five that get you removed.",
+  "items": [
+   "No racism — including slurs in text, stickers or GIFs, and anything targeting skin colour or nationality.",
+   "Respect the staff — they run the league.",
+   "Use channels for their purpose — fun-race talk belongs in the fun-race channel.",
+   "No NSFW — instant ban.",
+   "No doxxing — no addresses, names, faces or private information."
+  ]
+ },
+ "join": {
+  "title": "How to join",
+  "steps": [
+   {
+    "title": "Join the Discord",
+    "text": "Everything happens there: signings, race briefings, stewarding and the lap-time boards."
+   },
+   {
+    "title": "Verify",
+    "text": "Verification links your Roblox username to your Discord name so teams know who they are signing."
+   },
+   {
+    "title": "Get on the grid",
+    "text": "Pick a division, talk to team owners, or list yourself as a free agent. Contracts are signed publicly with team, role, length and nationality."
+   },
+   {
+    "title": "Prefer the paddock?",
+    "text": "Moderation, media, graphics and stewarding roles are open, with applications reviewed every Thursday."
+   }
+  ],
+  "invite": "",
+  "inviteNote": "Ask any staff member for the current invite link."
+ },
+ "faq": {
+  "title": "Questions",
+  "items": [
+   {
+    "q": "Do I need a powerful PC?",
+    "a": "No. Everything runs on Roblox, in FR26 (Formula 2026 Racing) and GTM."
+   },
+   {
+    "q": "I've never raced in a league before. Can I still join?",
+    "a": "Yes. F3 is deliberately the entry tier and F4 is being prepared, so most of the grid has room for new drivers."
+   },
+   {
+    "q": "Can I own a team?",
+    "a": "Yes — there are free team owner and team principal roles, and existing teams recruit throughout the season."
+   },
+   {
+    "q": "How are incidents handled?",
+    "a": "There is an incidents forum. Stewards review each report, and only race officials can issue penalties — anything a session host decides is provisional."
+   },
+   {
+    "q": "How long do contracts last?",
+    "a": "A maximum of two seasons, logged publicly in the signings channel."
+   },
+   {
+    "q": "Which regions play here?",
+    "a": "The server has Europe and Asia roles and runs in English."
+   }
+  ]
+ },
+ "footer": {
+  "text": "Built and run by the AMS staff team. Lineups update automatically from Discord roles."
+ }
 }
