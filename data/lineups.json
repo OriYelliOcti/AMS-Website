@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-19T15:30:17+00:00",
+ "generated_at": "2026-10-19T15:30:45+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -152,18 +152,13 @@
        ]
       },
       {
-       "slot": "Team Boss",
+       "slot": "Other",
        "members": [
         {
          "name": "Octi | MCL | Owner",
          "username": "emreeduardo",
          "bot": false
-        }
-       ]
-      },
-      {
-       "slot": "Other",
-       "members": [
+        },
         {
          "name": "Vin | MCL | 🇮🇩 | F1 | 🛠️",
          "username": "indoavgeek17",
