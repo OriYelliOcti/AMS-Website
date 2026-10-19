@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-10-18T18:46:05+00:00",
+ "generated_at": "2026-10-19T09:47:04+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 41,
-  "rostered": 49,
+  "rostered": 48,
   "officials": 5
  },
  "divisions": [
@@ -685,19 +685,8 @@
      "name": "[GT3] Aston Martin Vantage GT3",
      "short": "Aston Martin Vantage GT3",
      "color": "#11806a",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "Vradical | AMR | 🇨🇦 | #34",
-         "username": "v0ltaoi",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     },
     {
      "name": "[GT3] Bayerische Motoren Werke M4",
