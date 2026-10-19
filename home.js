@@ -52,7 +52,7 @@ function renderAbout(about) {
   const stats = $id("hero-stats");
   if (stats) {
     stats.innerHTML = (about.stats ?? []).map((s) => (
-      `<div class="hero-stat"><b>${esc(s.value)}</b><span>${esc(s.label)}</span></div>`
+      `<div class="board-row"><span>${esc(s.label)}</span><b>${esc(s.value)}</b></div>`
     )).join("");
   }
 }
@@ -65,12 +65,12 @@ function renderFeatures(features) {
   if (title) title.textContent = features.title ?? title.textContent;
   if (intro) intro.textContent = features.intro ?? "";
   if (list) {
-    list.innerHTML = (features.items ?? []).map((item) => `
-      <article class="card">
-        <div class="card-icon" aria-hidden="true">${esc(item.icon ?? "•")}</div>
+    list.innerHTML = (features.items ?? []).map((item, i) => `
+      <li>
+        <span class="n">${String(i + 1).padStart(2, "0")}</span>
         <h3>${esc(item.title)}</h3>
         <p>${esc(item.text)}</p>
-      </article>`).join("");
+      </li>`).join("");
   }
 }
 
@@ -87,8 +87,8 @@ function renderGrid(divisions) {
     rows.innerHTML = (divisions.items ?? []).map((d) => `
       <tr>
         <td><b>${esc(d.name)}</b></td>
-        <td class="num">${d.teams ? esc(d.teams) : "—"}</td>
-        <td class="num">${d.slots ? esc(d.slots) : "—"}</td>
+        <td class="num right">${d.teams ? esc(d.teams) : "—"}</td>
+        <td class="num right">${d.slots ? esc(d.slots) : "—"}</td>
         <td>${esc(d.note ?? "")}</td>
       </tr>`).join("");
   }
@@ -104,10 +104,11 @@ function renderCalendar(calendar) {
   if (rows) {
     rows.innerHTML = (calendar.rounds ?? []).map((r) => `
       <tr>
-        <td class="num">${esc(r.round)}</td>
-        <td>${esc(r.flag ?? "")} ${esc(r.circuit)}</td>
-        <td class="num">${esc(r.laps)}</td>
-        <td class="num">${esc(r.window)}</td>
+        <td class="num right">${esc(r.round)}</td>
+        <td><b>${esc(r.circuit)}</b></td>
+        <td class="code">${esc(r.country ?? "")}</td>
+        <td class="num right">${esc(r.laps)}</td>
+        <td class="num right">${esc(r.window)}</td>
       </tr>`).join("");
   }
 }
