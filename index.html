@@ -301,6 +301,42 @@
   </div>
 </section>
 
+<!-- Restricted. Reached only at #ams-FIA; never linked from the page. -->
+<section class="fia" id="fia" hidden aria-label="FIA race control">
+  <div class="shell fia-inner">
+    <header class="fia-head">
+      <p class="kicker">FIA — race control</p>
+      <h2>Stewarding desk</h2>
+      <p class="roster-sub">Officials, assignments and season state. Unlisted; not linked from anywhere on the site.</p>
+    </header>
+
+    <form class="fia-gate" id="fia-gate" autocomplete="off">
+      <label for="fia-password">Access code</label>
+      <div class="fia-gate-row">
+        <input type="password" id="fia-password" name="fia-password" autocomplete="current-password" spellcheck="false" required>
+        <button type="submit">Unlock</button>
+      </div>
+      <p class="fia-note" id="fia-gate-note" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="fia-body" id="fia-body" hidden>
+      <div class="fia-meta" id="fia-meta"></div>
+
+      <section class="officials" id="fia-officials-section">
+        <h3>Officials on file</h3>
+        <div class="officials-grid" id="fia-officials"></div>
+      </section>
+
+      <section class="officials" id="fia-season-section">
+        <h3>Season state</h3>
+        <div class="fia-season" id="fia-season"></div>
+      </section>
+
+      <button type="button" class="fia-lock" id="fia-lock">Lock this session</button>
+    </div>
+  </div>
+</section>
+
 <footer class="colophon">
   <div class="shell colophon-inner">
     <div>
@@ -323,5 +359,6 @@
 <script src="standings.js"></script>
 <script src="fantasy.js"></script>
 <script src="home.js"></script>
+<script src="fia.js"></script>
 </body>
 </html>
