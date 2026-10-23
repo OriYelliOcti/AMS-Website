@@ -1439,3 +1439,226 @@ body[data-fia="on"] > :not(#fia) { display: none !important; }
   color: var(--panel-muted);
 }
 .fia-round { margin: 0 0 4px; font-size: 0.9rem; }
+
+/* ---------- FIA desk: editor chrome ---------- */
+
+.fia { --bg: var(--panel-bg); }
+.fia-head { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; justify-content: space-between; }
+.fia-head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.fia-head-actions .action { font-size: 0.62rem; }
+.fia .action { padding: 8px 13px; font-size: 0.6rem; }
+.fia .action[disabled] { opacity: 0.45; cursor: not-allowed; }
+.fia .action[disabled]::after { content: ""; }
+.fia-danger { border-color: var(--red); color: var(--red); }
+.fia-danger:hover { background: var(--red); color: #fff; }
+
+.fia-settings {
+  margin-top: 26px;
+  padding: 20px;
+  border: 1px solid var(--panel-rule);
+}
+.fia-settings h3 { margin: 0 0 16px; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--mono); }
+
+.fia-form-grid { display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.fia-form-grid label,
+.fia-form > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--panel-muted);
+}
+.fia-form input,
+.fia-form select,
+.fia-form textarea,
+.fia-settings input {
+  padding: 9px 11px;
+  border: 1px solid var(--panel-rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--panel-fg);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  width: 100%;
+  min-width: 0;
+}
+.fia-form textarea { resize: vertical; line-height: 1.5; }
+.fia-form input:focus-visible,
+.fia-form select:focus-visible,
+.fia-form textarea:focus-visible,
+.fia-settings input:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+.fia-form select option { background: var(--panel-bg); color: var(--panel-fg); }
+.fia-wide { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--panel-muted); }
+
+.fia-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--panel-rule);
+}
+.fia-nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.fia-nav button,
+.fia-filters button {
+  padding: 7px 12px;
+  border: 1px solid var(--panel-rule);
+  background: transparent;
+  color: var(--panel-muted);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.fia-nav button:hover,
+.fia-filters button:hover { color: var(--panel-fg); border-color: var(--panel-fg); }
+.fia-nav button[aria-pressed="true"],
+.fia-filters button[aria-pressed="true"] { background: var(--panel-fg); border-color: var(--panel-fg); color: var(--panel-bg); }
+.fia-publish { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fia-dirty {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.fia-dirty::before { content: "● "; }
+
+.fia-view { margin-top: 26px; }
+.fia-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+.fia-section-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.fia-section-head h3,
+.fia-view > h3 { margin: 0 0 14px; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--mono); }
+.fia-section-head h3 { margin-bottom: 0; }
+
+.fia-cards { display: grid; gap: 14px; }
+.fia-card { padding: 18px 20px; border: 1px solid var(--panel-rule); }
+.fia-card header h4 { margin: 0 0 4px; font-size: 0.98rem; letter-spacing: -0.01em; }
+.fia-card header p { margin: 0; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--panel-muted); }
+.fia-card .fia-actions { margin-top: 14px; }
+.fia-card > p { margin: 10px 0 0; font-size: 0.86rem; }
+.fia-clip-url { font-family: var(--mono); font-size: 0.66rem; word-break: break-all; color: var(--panel-muted); }
+
+.fia-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.fia-form { margin-top: 8px; }
+.fia-form h4 { margin: 26px 0 10px; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--panel-muted); }
+.fia-hint { margin: 14px 0; max-width: 74ch; font-size: 0.78rem; line-height: 1.6; color: var(--panel-muted); }
+.fia-hint b { color: var(--panel-fg); }
+
+.fia-order { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 6px; }
+.fia-order-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 110px 108px 58px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid var(--panel-rule);
+}
+.fia-order-row select { padding: 6px 8px; font-size: 0.72rem; }
+.fia-pos { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; }
+.fia-team { font-family: var(--mono); font-size: 0.62rem; color: var(--panel-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fia-pts { font-family: var(--mono); font-size: 0.62rem; color: var(--panel-muted); text-align: right; }
+.fia-order-actions { display: flex; gap: 4px; }
+.fia-order-actions button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--panel-rule);
+  background: transparent;
+  color: var(--panel-fg);
+  font-size: 0.78rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.fia-order-actions button:hover { border-color: var(--panel-fg); }
+.fia-order-actions button[disabled] { opacity: 0.3; cursor: not-allowed; }
+@media (max-width: 720px) {
+  .fia-order-row { grid-template-columns: 40px minmax(0, 1fr) auto; grid-auto-rows: auto; }
+  .fia-team, .fia-pts { display: none; }
+}
+
+.fia-decisions, .fia-activity { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.fia-decisions li {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--panel-rule);
+}
+.fia-decisions li:first-child { border-top: 0; padding-top: 0; }
+.fia-decisions p { margin: 4px 0 0; font-size: 0.84rem; }
+.fia-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.fia-meta-line { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--panel-muted); }
+.fia-activity li { padding: 11px 0; border-top: 1px solid var(--panel-rule); font-size: 0.84rem; }
+.fia-activity li:first-child { border-top: 0; }
+
+.fia .table-wrap { margin: 0 0 26px; }
+.fia .sheet { width: 100%; border-collapse: collapse; }
+.fia .sheet th, .fia .sheet td { padding: 8px 10px; border-bottom: 1px solid var(--panel-rule); text-align: left; font-size: 0.8rem; }
+.fia .sheet th { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--panel-muted); font-weight: 500; }
+.fia .sheet .right, .fia .sheet .num { text-align: right; font-family: var(--mono); }
+.fia .sheet .num { font-size: 0.74rem; }
+.fia .empty-line { color: var(--panel-muted); font-size: 0.84rem; }
+
+/* ---------- Public Stewards tab ---------- */
+
+.decisions { display: grid; gap: 26px; margin-bottom: 34px; }
+.decision-round h4 { margin: 0 0 10px; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.decision-round ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.decision {
+  display: grid;
+  gap: 6px 18px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.decision-main p { margin: 4px 0 0; font-size: 0.86rem; line-height: 1.55; color: var(--muted); }
+.decision-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: var(--mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.decision-meta { margin: 0; text-align: right; font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; }
+@media (max-width: 640px) {
+  .decision { grid-template-columns: 1fr; }
+  .decision-meta { text-align: left; }
+}
+
+.clips { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.clip { display: flex; flex-direction: column; gap: 8px; }
+.clip h4 { margin: 0; font-size: 0.92rem; letter-spacing: -0.01em; }
+.clip-meta { margin: 0; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.clip-note { margin: 0; font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.clip-frame { position: relative; aspect-ratio: 16 / 9; background: #000; }
+.clip-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.clip-video { width: 100%; aspect-ratio: 16 / 9; background: #000; }
+
+/* `.action` sets its own display, which would otherwise beat the [hidden] rule. */
+.fia .action[hidden] { display: none !important; }
