@@ -6,8 +6,8 @@
   "use strict";
 
   const BLOCK_ID = "roster";
-  const HASH_FOR = { lineups: "#roster", results: "#results", fantasy: "#fantasy" };
-  const TAB_FOR_HASH = { roster: "lineups", lineups: "lineups", results: "results", fantasy: "fantasy" };
+  const HASH_FOR = { lineups: "#roster", results: "#results", fantasy: "#fantasy", stewards: "#stewards" };
+  const TAB_FOR_HASH = { roster: "lineups", lineups: "lineups", results: "results", fantasy: "fantasy", stewards: "stewards" };
 
   const tabs = Array.from(document.querySelectorAll('[role="tab"][data-tab]'));
   if (!tabs.length) return;
