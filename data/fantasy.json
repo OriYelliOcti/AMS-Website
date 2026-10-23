@@ -1,0 +1,32 @@
+{
+ "schema": 1,
+ "season": "Season 1",
+ "updated_at": "2026-10-23T14:16:39+00:00",
+ "picks": {
+  "drivers": 3,
+  "teams": 1
+ },
+ "divisions": [
+  {
+   "name": "F1",
+   "rounds": [
+    1
+   ],
+   "entries": [
+    {
+     "name": "Octi | MCL | Owner",
+     "username": "emreeduardo",
+     "points": 0,
+     "rounds": 0,
+     "best": 0,
+     "last": null,
+     "position": 1
+    }
+   ],
+   "latest": {
+    "round": 1,
+    "entries": []
+   }
+  }
+ ]
+}
