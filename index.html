@@ -171,6 +171,7 @@
       <button type="button" role="tab" id="tab-lineups" aria-controls="panel-lineups" aria-selected="true" data-tab="lineups">Lineups</button>
       <button type="button" role="tab" id="tab-results" aria-controls="panel-results" aria-selected="false" data-tab="results">Results</button>
       <button type="button" role="tab" id="tab-fantasy" aria-controls="panel-fantasy" aria-selected="false" data-tab="fantasy">Fantasy</button>
+      <button type="button" role="tab" id="tab-stewards" aria-controls="panel-stewards" aria-selected="false" data-tab="stewards">Stewards</button>
     </div>
 
     <div class="tabpanel" id="panel-lineups" role="tabpanel" aria-labelledby="tab-lineups">
@@ -298,6 +299,21 @@
         </section>
       </div>
     </div>
+
+    <div class="tabpanel" id="panel-stewards" role="tabpanel" aria-labelledby="tab-stewards" hidden>
+      <p class="panel-lede">Every steward decision and race clip published from race control, newest first.</p>
+      <div class="standings-toolbar">
+        <nav class="standings-nav" id="stewards-nav" aria-label="Decisions division"></nav>
+        <p class="standings-updated" id="stewards-updated"></p>
+      </div>
+      <p class="standings-status" id="stewards-status" role="status" aria-live="polite">Loading decisions…</p>
+
+      <h3 class="table-heading">Decisions</h3>
+      <div class="decisions" id="decisions-list"></div>
+
+      <h3 class="table-heading">Clips</h3>
+      <div class="clips" id="clips-list"></div>
+    </div>
   </div>
 </section>
 
@@ -305,9 +321,15 @@
 <section class="fia" id="fia" hidden aria-label="FIA race control">
   <div class="shell fia-inner">
     <header class="fia-head">
-      <p class="kicker">FIA — race control</p>
-      <h2>Stewarding desk</h2>
-      <p class="roster-sub">Officials, assignments and season state. Unlisted; not linked from anywhere on the site.</p>
+      <div>
+        <p class="kicker">FIA — race control</p>
+        <h2>Stewarding desk</h2>
+        <p class="roster-sub">Results, decisions and clips. Unlisted; not linked from anywhere on the site.</p>
+      </div>
+      <div class="fia-head-actions">
+        <button type="button" class="action" id="fia-settings-toggle" aria-expanded="false" aria-controls="fia-settings">Publish settings</button>
+        <button type="button" class="action" id="fia-lock">Lock</button>
+      </div>
     </header>
 
     <form class="fia-gate" id="fia-gate" autocomplete="off">
@@ -320,19 +342,41 @@
     </form>
 
     <div class="fia-body" id="fia-body" hidden>
+      <section class="fia-settings" id="fia-settings" aria-label="Publish settings" hidden>
+        <h3>Publish settings</h3>
+        <div class="fia-form-grid">
+          <label>Repository<input type="text" id="fia-repo" spellcheck="false" autocomplete="off" placeholder="owner/repo"></label>
+          <label>Branch<input type="text" id="fia-branch" spellcheck="false" autocomplete="off" placeholder="main"></label>
+          <label>Your name<input type="text" id="fia-author" spellcheck="false" autocomplete="off" placeholder="Who is on the desk"></label>
+          <label>GitHub token<input type="password" id="fia-token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+        </div>
+        <p class="fia-hint">Fine-grained token with <b>Contents: read and write</b> on that repository. It stays in this tab only; locking or closing the tab forgets it.</p>
+        <div class="fia-actions">
+          <button type="button" class="action" id="fia-check">Check access</button>
+          <button type="button" class="action" id="fia-forget">Forget token</button>
+        </div>
+        <p class="fia-note" id="fia-settings-note" role="status" aria-live="polite"></p>
+      </section>
+
+      <div class="fia-toolbar">
+        <nav class="fia-nav" id="fia-nav" aria-label="Desk views">
+          <button type="button" data-view="rounds" aria-pressed="true">Rounds</button>
+          <button type="button" data-view="decisions" aria-pressed="false">Decisions</button>
+          <button type="button" data-view="clips" aria-pressed="false">Clips</button>
+          <button type="button" data-view="standings" aria-pressed="false">Standings</button>
+          <button type="button" data-view="squad" aria-pressed="false">Squad</button>
+          <button type="button" data-view="activity" aria-pressed="false">Activity</button>
+        </nav>
+        <div class="fia-publish">
+          <span class="fia-dirty" id="fia-dirty" hidden>Unpublished changes</span>
+          <button type="button" class="action" id="fia-discard" hidden>Discard</button>
+          <button type="button" class="action action-solid" id="fia-publish">Publish</button>
+        </div>
+      </div>
+
       <div class="fia-meta" id="fia-meta"></div>
-
-      <section class="officials" id="fia-officials-section">
-        <h3>Officials on file</h3>
-        <div class="officials-grid" id="fia-officials"></div>
-      </section>
-
-      <section class="officials" id="fia-season-section">
-        <h3>Season state</h3>
-        <div class="fia-season" id="fia-season"></div>
-      </section>
-
-      <button type="button" class="fia-lock" id="fia-lock">Lock this session</button>
+      <p class="fia-note" id="fia-status" role="status" aria-live="polite"></p>
+      <div class="fia-view" id="fia-view"></div>
     </div>
   </div>
 </section>
@@ -355,8 +399,10 @@
 </footer>
 
 <script src="tabs.js"></script>
+<script src="results-core.js"></script>
 <script src="app.js"></script>
 <script src="standings.js"></script>
+<script src="decisions.js"></script>
 <script src="fantasy.js"></script>
 <script src="home.js"></script>
 <script src="fia.js"></script>
