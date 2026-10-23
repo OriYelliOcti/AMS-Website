@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-23T14:12:07+00:00",
+ "generated_at": "2026-10-23T14:25:45+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -162,7 +162,7 @@
        ]
       },
       {
-       "slot": "Other",
+       "slot": "Pit Crew",
        "members": [
         {
          "name": "Vin | MCL | 🇮🇩 | F1 | 🛠️",
@@ -177,7 +177,7 @@
      "name": "[F1] Mercedes AMG // PETRONAS",
      "short": "Mercedes AMG // PETRONAS",
      "color": "#1abc9c",
-     "member_count": 4,
+     "member_count": 5,
      "slots": [
       {
        "slot": "Driver",
@@ -207,6 +207,16 @@
          "username": "mmverstappen33vdagreat_48117",
          "bot": false
         },
+        {
+         "name": "Toast | MER/AMG/HAR | 🇩🇪 | 👑",
+         "username": "maxi_12.5",
+         "bot": false
+        }
+       ]
+      },
+      {
+       "slot": "Pit Crew",
+       "members": [
         {
          "name": "Toast | MER/AMG/HAR | 🇩🇪 | 👑",
          "username": "maxi_12.5",
