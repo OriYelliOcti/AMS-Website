@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-23T13:15:59+00:00",
+ "generated_at": "2026-10-23T13:19:14+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -653,7 +653,7 @@
      "member_count": 1,
      "slots": [
       {
-       "slot": "Other",
+       "slot": "Team Boss",
        "members": [
         {
          "name": "RuTa | 🇯🇵 |",
@@ -671,7 +671,7 @@
      "member_count": 1,
      "slots": [
       {
-       "slot": "Other",
+       "slot": "Team Boss",
        "members": [
         {
          "name": "El_Silkmeister",
