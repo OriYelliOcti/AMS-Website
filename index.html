@@ -160,34 +160,144 @@
   <div class="shell roster-head">
     <div>
       <p class="kicker">08 — Timing sheet</p>
-      <h2>Live lineups</h2>
+      <h2>Race centre</h2>
       <p class="roster-sub" id="guild-name">Loading…</p>
     </div>
     <div class="headline-stats" id="totals"></div>
   </div>
 
   <div class="shell">
-    <div class="toolbar">
-      <label class="search">
-        <span class="search-icon" aria-hidden="true">/</span>
-        <input type="search" id="search" placeholder="Search driver, team or username" autocomplete="off" spellcheck="false" aria-label="Search lineups">
-      </label>
-      <nav class="divisions" id="division-nav" aria-label="Divisions"></nav>
-      <p class="updated">
-        <span id="updated"></span>
-        <span class="live" id="live" data-state="connecting" hidden>
-          <span class="live-dot" aria-hidden="true"></span><span id="live-text">Live</span>
-        </span>
-      </p>
+    <div class="tabs" role="tablist" aria-label="Race centre">
+      <button type="button" role="tab" id="tab-lineups" aria-controls="panel-lineups" aria-selected="true" data-tab="lineups">Lineups</button>
+      <button type="button" role="tab" id="tab-results" aria-controls="panel-results" aria-selected="false" data-tab="results">Results</button>
+      <button type="button" role="tab" id="tab-fantasy" aria-controls="panel-fantasy" aria-selected="false" data-tab="fantasy">Fantasy</button>
     </div>
 
-    <p class="status" id="status" role="status" aria-live="polite">Loading lineups…</p>
-    <main id="lineups"></main>
+    <div class="tabpanel" id="panel-lineups" role="tabpanel" aria-labelledby="tab-lineups">
+      <div class="toolbar">
+        <label class="search">
+          <span class="search-icon" aria-hidden="true">/</span>
+          <input type="search" id="search" placeholder="Search driver, team or username" autocomplete="off" spellcheck="false" aria-label="Search lineups">
+        </label>
+        <nav class="divisions" id="division-nav" aria-label="Divisions"></nav>
+        <p class="updated">
+          <span id="updated"></span>
+          <span class="live" id="live" data-state="connecting" hidden>
+            <span class="live-dot" aria-hidden="true"></span><span id="live-text">Live</span>
+          </span>
+        </p>
+      </div>
 
-    <section class="officials" id="officials-section" hidden>
-      <h3>Race officials</h3>
-      <div class="officials-grid" id="officials"></div>
-    </section>
+      <p class="status" id="status" role="status" aria-live="polite">Loading lineups…</p>
+      <div id="lineups"></div>
+
+      <section class="officials" id="officials-section" hidden>
+        <h3>Race officials</h3>
+        <div class="officials-grid" id="officials"></div>
+      </section>
+    </div>
+
+    <div class="tabpanel" id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden>
+      <p class="panel-lede">Every round recorded by AMS staff, scored and totalled automatically.</p>
+      <div class="standings-toolbar">
+        <nav class="standings-nav" id="standings-nav" aria-label="Championship division"></nav>
+        <p class="standings-updated" id="standings-updated"></p>
+      </div>
+      <p class="standings-status" id="standings-status" role="status" aria-live="polite">Loading standings…</p>
+      <div class="standings-grid">
+        <div>
+          <h3 class="table-heading">Drivers</h3>
+          <div class="table-wrap">
+            <table class="sheet">
+              <thead>
+                <tr>
+                  <th scope="col" class="right">Pos</th>
+                  <th scope="col">Driver</th>
+                  <th scope="col">Team</th>
+                  <th scope="col" class="right">Pts</th>
+                  <th scope="col" class="right">Wins</th>
+                  <th scope="col" class="right">Podiums</th>
+                </tr>
+              </thead>
+              <tbody id="standings-drivers"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 class="table-heading">Constructors</h3>
+          <div class="table-wrap">
+            <table class="sheet">
+              <thead>
+                <tr>
+                  <th scope="col" class="right">Pos</th>
+                  <th scope="col">Team</th>
+                  <th scope="col" class="right">Pts</th>
+                  <th scope="col" class="right">Wins</th>
+                </tr>
+              </thead>
+              <tbody id="standings-teams"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="last-round" id="last-round" hidden></div>
+    </div>
+
+    <div class="tabpanel" id="panel-fantasy" role="tabpanel" aria-labelledby="tab-fantasy" hidden>
+      <p class="panel-lede">
+        Pick your drivers and a team here, then paste the code into Discord with
+        <code>/fantasy code:…</code>. Picks lock when staff record the round, and points
+        are added automatically: your drivers' points plus your team's points that round.
+      </p>
+      <div class="standings-toolbar">
+        <nav class="standings-nav" id="fantasy-nav" aria-label="Fantasy division"></nav>
+        <p class="standings-updated" id="fantasy-updated"></p>
+      </div>
+      <p class="standings-status" id="fantasy-status" role="status" aria-live="polite">Loading fantasy…</p>
+
+      <div class="fantasy-grid">
+        <section class="fantasy-builder">
+          <h3 class="table-heading">Build your team</h3>
+          <p class="fantasy-round" id="fantasy-round"></p>
+          <p class="fantasy-group" id="fantasy-driver-label">Drivers</p>
+          <div class="chips" id="fantasy-drivers"></div>
+          <p class="fantasy-group" id="fantasy-team-label">Team</p>
+          <div class="chips" id="fantasy-teams"></div>
+          <div class="fantasy-actions">
+            <button class="action action-solid" id="fantasy-lock" type="button" disabled>Lock in team</button>
+            <button class="action" id="fantasy-reset" type="button">Reset</button>
+          </div>
+          <p class="fantasy-hint" id="fantasy-hint" role="status" aria-live="polite"></p>
+          <div class="fantasy-code" id="fantasy-code" hidden>
+            <p class="fantasy-group">Your lock-in code</p>
+            <code id="fantasy-code-value"></code>
+            <div class="fantasy-actions">
+              <button class="action" id="fantasy-copy" type="button">Copy code</button>
+            </div>
+            <p class="fantasy-hint">In Discord: <code>/fantasy code:</code> then paste. One code per round.</p>
+          </div>
+        </section>
+
+        <section class="fantasy-board">
+          <h3 class="table-heading">Fantasy championship</h3>
+          <div class="table-wrap">
+            <table class="sheet">
+              <thead>
+                <tr>
+                  <th scope="col" class="right">Pos</th>
+                  <th scope="col">Player</th>
+                  <th scope="col" class="right">Pts</th>
+                  <th scope="col" class="right">Rounds</th>
+                  <th scope="col" class="right">Best</th>
+                </tr>
+              </thead>
+              <tbody id="fantasy-standings"></tbody>
+            </table>
+          </div>
+          <div class="last-round" id="fantasy-latest" hidden></div>
+        </section>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -208,7 +318,10 @@
   </div>
 </footer>
 
+<script src="tabs.js"></script>
 <script src="app.js"></script>
+<script src="standings.js"></script>
+<script src="fantasy.js"></script>
 <script src="home.js"></script>
 </body>
 </html>
