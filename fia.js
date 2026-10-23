@@ -143,6 +143,11 @@
     return names;
   }
 
+  // Everyone on a team in this division is selectable as a driver, not only the
+  // Driver/Reserve seats: stewards record a result for whoever actually raced,
+  // and a crew member or boss standing in must not be missing from the list. A
+  // racing seat wins when somebody holds two roles, and the slot is shown so a
+  // staff name is not mistaken for a seat.
   function roster(division) {
     const entry = (state.lineups?.divisions ?? []).find(
       (item) => String(item?.name ?? "").toUpperCase() === String(division ?? "").toUpperCase(),
@@ -150,18 +155,28 @@
     const people = new Map();
     for (const team of entry?.teams ?? []) {
       for (const slot of team.slots ?? []) {
-        if (!ROSTER_SLOTS.includes(slot.slot)) continue;
+        const racing = ROSTER_SLOTS.includes(slot.slot);
         for (const person of slot.members ?? []) {
-          if (!person?.username || person.bot || people.has(person.username)) continue;
+          if (!person?.username || person.bot) continue;
+          const held = people.get(person.username);
+          if (held && (held.racing || !racing)) continue;
           people.set(person.username, {
             name: person.name,
             username: person.username,
             team: team.short || team.name,
+            slot: slot.slot,
+            racing,
           });
         }
       }
     }
     return people;
+  }
+
+  function rosterLabel(person) {
+    return person.racing
+      ? `${person.name} (${person.team})`
+      : `${person.name} (${person.team} · ${person.slot})`;
   }
 
   function personOf(entry) {
@@ -292,9 +307,15 @@
     const table = CORE.pointsTable(CORE.divisionEntry(state.doc, edit.division) ?? {});
     const people = roster(edit.division);
     const used = new Set(edit.entries.map((entry) => entry.username));
+    const bySeat = (a, b) => {
+      if (a.racing !== b.racing) return a.racing ? -1 : 1;
+      return a.name.localeCompare(b.name, LOCALE);
+    };
     const available = [...people.values()]
       .filter((person) => !used.has(person.username))
-      .sort((a, b) => a.name.localeCompare(b.name, LOCALE));
+      .sort(bySeat);
+    const everyone = [...people.values()].sort(bySeat);
+    const seats = [...people.values()].filter((person) => person.racing).length;
 
     let position = 0;
     const rows = edit.entries.map((entry, index) => {
@@ -302,7 +323,7 @@
       if (!retired) position += 1;
       const scored = retired ? 0 : CORE.pointsFor(table, position);
       const driverOptions = options(
-        [...people.values()].map((person) => [person.username, `${person.name} (${person.team})`]),
+        everyone.map((person) => [person.username, rosterLabel(person)]),
         entry.username,
         "— driver —",
       );
@@ -329,7 +350,7 @@
     const finishers = edit.entries
       .filter((entry) => entry.status !== "retired")
       .map((entry) => [entry.username, entry.name]);
-    const addOptions = available.map((person) => [person.username, `${person.name} (${person.team})`]);
+    const addOptions = available.map((person) => [person.username, rosterLabel(person)]);
 
     return `<div class="fia-section-head">
         <h3>${edit.mode === "new" ? "New round" : "Edit round"}</h3>
@@ -350,6 +371,7 @@
           <select id="fia-add-driver" aria-label="Driver to add">${options(addOptions, "", "— add a driver —")}</select>
           <button type="button" class="action" data-action="entry-add">Add driver</button>
         </div>
+        <p class="fia-hint">${everyone.length} people on the ${esc(edit.division)} roster — ${seats} racing seats first, then staff and crew, so a stand-in is never missing.</p>
 
         <div class="fia-form-grid">
           <label>Pole<select data-edit="pole">${options(finishers, edit.pole, "— none —")}</select></label>
