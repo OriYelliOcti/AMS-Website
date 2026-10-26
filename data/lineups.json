@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-10-26T14:14:14+00:00",
+ "generated_at": "2026-10-26T18:16:42+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 41,
-  "rostered": 49,
+  "rostered": 48,
   "officials": 5
  },
  "divisions": [
@@ -305,7 +305,7 @@
      "name": "[F1] Tuhago Mobil 1 Formula 1 Team",
      "short": "Tuhago Mobil 1 Formula 1 Team",
      "color": "#0f0e5b",
-     "member_count": 5,
+     "member_count": 4,
      "slots": [
       {
        "slot": "Driver",
@@ -318,11 +318,6 @@
         {
          "name": "blessingjonah241",
          "username": "blessingjonah241_67986",
-         "bot": false
-        },
-        {
-         "name": "Max Verstappen",
-         "username": "packgodgood",
          "bot": false
         }
        ]
