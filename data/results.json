@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "season": "Season 1",
- "updated_at": "2026-11-02T10:09:27.409Z",
+ "updated_at": "2026-11-02T09:38:54+00:00",
  "divisions": [
   {
    "name": "F1",
@@ -98,20 +98,7 @@
        "points": 6
       }
      ],
-     "penalties": [
-      {
-       "id": "1793614038359-yoke-dsq",
-       "key": "yoke",
-       "name": "Yoke",
-       "username": "",
-       "team": "",
-       "type": "dsq",
-       "value": 0,
-       "reason": "test -octi",
-       "by": "Octi",
-       "at": "2026-11-02T10:07:18.359Z"
-      }
-     ]
+     "penalties": []
     }
    ],
    "standings": {
@@ -182,6 +169,19 @@
       "position": 5
      },
      {
+      "name": "Yoke",
+      "username": "",
+      "team": "",
+      "points": 8,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 6,
+      "position": 6
+     },
+     {
       "name": "Theoxodh | MAW | 🇰🇷 | #71",
       "username": "happy_theooooooooooooooooooooooo",
       "team": "",
@@ -192,19 +192,6 @@
       "poles": 0,
       "fastest_laps": 0,
       "best": 7,
-      "position": 6
-     },
-     {
-      "name": "Yoke",
-      "username": "",
-      "team": "",
-      "points": 0,
-      "starts": 1,
-      "wins": 0,
-      "podiums": 0,
-      "poles": 0,
-      "fastest_laps": 0,
-      "best": null,
       "position": 7
      }
     ],
@@ -228,18 +215,5 @@
   }
  ],
  "media": [],
- "audit": [
-  {
-   "action": "decision",
-   "detail": "F1 R1 · Yoke · Disqualification — test -octi",
-   "by": "Octi",
-   "at": "2026-11-02T10:07:18.360Z"
-  },
-  {
-   "action": "published",
-   "detail": "1 rounds · by Octi",
-   "by": "Octi",
-   "at": "2026-11-02T10:09:27.409Z"
-  }
- ]
+ "audit": []
 }
