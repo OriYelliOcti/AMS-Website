@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=20261023a">
+<link rel="stylesheet" href="style.css?v=20261102a">
 <script>
   // Set the theme before first paint so the page never flashes the wrong background.
   (function () {
@@ -324,10 +324,10 @@
       <div>
         <p class="kicker">FIA — race control</p>
         <h2>Stewarding desk</h2>
-        <p class="roster-sub">Results, decisions and clips. Unlisted; not linked from anywhere on the site.</p>
+        <p class="roster-sub">Rounds, decisions and standings, with every driver in the league available. Unlisted; not linked from anywhere on the site.</p>
       </div>
       <div class="fia-head-actions">
-        <button type="button" class="action" id="fia-settings-toggle" aria-expanded="false" aria-controls="fia-settings">Publish settings</button>
+        <button type="button" class="action" data-action="settings" id="fia-settings-toggle" aria-expanded="false" aria-controls="fia-settings">Publish settings</button>
         <button type="button" class="action" id="fia-lock">Lock</button>
       </div>
     </header>
@@ -345,18 +345,40 @@
       <section class="fia-settings" id="fia-settings" aria-label="Publish settings" hidden>
         <h3>Publish settings</h3>
         <div class="fia-form-grid">
-          <label>Repository<input type="text" id="fia-repo" spellcheck="false" autocomplete="off" placeholder="owner/repo"></label>
-          <label>Branch<input type="text" id="fia-branch" spellcheck="false" autocomplete="off" placeholder="main"></label>
+          <label>Bridge URL<input type="text" id="fia-bridge" spellcheck="false" autocomplete="off" placeholder="http://127.0.0.1:8802"></label>
+          <label>Bridge token<input type="password" id="fia-bridge-token" autocomplete="off" spellcheck="false" placeholder="desk token"></label>
           <label>Your name<input type="text" id="fia-author" spellcheck="false" autocomplete="off" placeholder="Who is on the desk"></label>
-          <label>GitHub token<input type="password" id="fia-token" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
         </div>
-        <p class="fia-hint">Fine-grained token with <b>Contents: read and write</b> on that repository. It stays in this tab only; locking or closing the tab forgets it.</p>
+        <p class="fia-hint">Publishing goes to the desk bridge on the laptop. The GitHub token lives there, so nothing here grants write access to the repo — only the bridge key does, and only while the bridge runs.</p>
         <div class="fia-actions">
-          <button type="button" class="action" id="fia-check">Check access</button>
-          <button type="button" class="action" id="fia-forget">Forget token</button>
+          <button type="button" class="action" data-action="check-bridge">Check bridge</button>
+          <button type="button" class="action" data-action="forget">Forget token</button>
         </div>
         <p class="fia-note" id="fia-settings-note" role="status" aria-live="polite"></p>
       </section>
+
+      <div class="fia-toolbar">
+        <nav class="fia-nav" id="fia-nav" aria-label="Desk views">
+          <button type="button" data-view="rounds" data-action="view" aria-pressed="true">Rounds</button>
+          <button type="button" data-view="drivers" data-action="view" aria-pressed="false">Drivers</button>
+          <button type="button" data-view="decisions" data-action="view" aria-pressed="false">Decisions</button>
+          <button type="button" data-view="standings" data-action="view" aria-pressed="false">Standings</button>
+          <button type="button" data-view="audit" data-action="view" aria-pressed="false">Audit</button>
+        </nav>
+        <div class="fia-publish">
+          <span class="fia-dirty" id="fia-dirty" hidden>Unpublished changes</span>
+          <button type="button" class="action" data-action="discard" id="fia-discard" hidden>Discard</button>
+          <button type="button" class="action" data-action="preview" id="fia-preview">Preview</button>
+          <button type="button" class="action action-solid" data-action="publish" id="fia-publish">Publish</button>
+        </div>
+      </div>
+
+      <div class="fia-meta" id="fia-meta"></div>
+      <p class="fia-note" id="fia-status" role="status" aria-live="polite"></p>
+      <div class="fia-view" id="fia-view"></div>
+    </div>
+  </div>
+</section>
 
       <div class="fia-toolbar">
         <nav class="fia-nav" id="fia-nav" aria-label="Desk views">
@@ -405,6 +427,6 @@
 <script src="decisions.js?v=20261023a"></script>
 <script src="fantasy.js?v=20261023a"></script>
 <script src="home.js?v=20261023a"></script>
-<script src="fia.js?v=20261023a"></script>
+<script src="fia.js?v=20261102a"></script>
 </body>
 </html>
