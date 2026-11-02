@@ -1662,3 +1662,73 @@ body[data-fia="on"] > :not(#fia) { display: none !important; }
 
 /* `.action` sets its own display, which would otherwise beat the [hidden] rule. */
 .fia .action[hidden] { display: none !important; }
+
+/* ---------- FIA desk: rebuilt panel ---------- */
+
+.fia-body { margin-top: 28px; }
+.fia-view { margin-top: 22px; display: grid; gap: 22px; }
+.fia-toolbar-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin: 18px 0 8px; }
+.fia-nav-inline { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.fia-roundnav { margin-bottom: 4px; }
+
+.fia-roundedit { display: grid; gap: 18px; margin-top: 14px; }
+.fia-paste { border: 1px solid var(--panel-rule); padding: 16px; }
+.fia-paste label { display: block; font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--panel-muted); margin-bottom: 8px; }
+.fia-paste textarea {
+  width: 100%; resize: vertical; padding: 10px 12px; background: transparent; color: var(--panel-fg);
+  border: 1px solid var(--panel-rule); font-family: var(--mono); font-size: 0.78rem; line-height: 1.6;
+}
+.fia-paste textarea:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+
+.fia-grid { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.fia-grid th {
+  text-align: left; font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--panel-muted); border-bottom: 1px solid var(--panel-rule); padding: 8px 10px 8px 0;
+}
+.fia-grid td { border-bottom: 1px solid var(--panel-rule); padding: 8px 10px 8px 0; vertical-align: middle; }
+.fia-grid tr.is-dnf td { color: var(--panel-muted); text-decoration: line-through; }
+.fia-grid tr.is-dnf td.fia-rowtools, .fia-grid tr.is-dnf td.fia-toggle { text-decoration: none; }
+.fia-grid tr.is-unknown td { background: rgba(208, 33, 43, 0.08); }
+.fia-grid select, .fia-grid input[type="text"] {
+  width: 100%; min-width: 150px; padding: 6px 8px; background: transparent; color: var(--panel-fg);
+  border: 1px solid var(--panel-rule); font-family: var(--mono); font-size: 0.74rem;
+}
+.fia-grid input[type="text"][data-action="gap"] { min-width: 90px; }
+.fia-pos { width: 2.2rem; font-family: var(--mono); color: var(--panel-muted); }
+.fia-num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.fia-avatar { width: 2.4rem; font-family: var(--mono); font-size: 0.68rem; color: var(--panel-muted); }
+.fia-sub { color: var(--panel-muted); font-family: var(--mono); font-size: 0.68rem; }
+.fia-toggle label { display: inline-flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 0.62rem; color: var(--panel-muted); white-space: nowrap; }
+.fia-rowtools { white-space: nowrap; text-align: right; }
+.fia-rowtools button {
+  background: transparent; color: var(--panel-muted); border: 1px solid var(--panel-rule);
+  width: 26px; height: 24px; cursor: pointer; font-size: 0.7rem; line-height: 1;
+}
+.fia-rowtools button:hover:not([disabled]) { color: var(--panel-fg); border-color: var(--panel-fg); }
+.fia-rowtools button[disabled] { opacity: 0.35; cursor: not-allowed; }
+
+.fia-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fia-chip {
+  display: inline-block; padding: 2px 7px; border: 1px solid var(--panel-rule);
+  font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--panel-muted);
+}
+.fia-chip-warn { border-color: var(--red); color: var(--red); }
+.fia-chip-new { border-color: var(--panel-fg); color: var(--panel-fg); }
+.fia-chip-up { border-color: #3f9d5a; color: #6fd48c; }
+.fia-chip-down { border-color: var(--red); color: var(--red); }
+
+.fia-toolbar-row input[type="search"] {
+  flex: 1 1 260px; padding: 8px 10px; background: transparent; color: var(--panel-fg);
+  border: 1px solid var(--panel-rule); font-family: var(--mono); font-size: 0.76rem;
+}
+
+.fia-preview { border: 1px solid var(--panel-rule); padding: 18px; margin-top: 16px; }
+.fia-preview h3 { margin: 0 0 14px; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--panel-muted); }
+.fia-preview-grid { display: grid; gap: 20px 32px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.fia-preview h4 { margin: 0 0 8px; font-size: 0.8rem; }
+.fia-preview ul { margin: 0; padding-left: 18px; font-size: 0.8rem; line-height: 1.7; }
+.fia-preview .up { color: #6fd48c; font-family: var(--mono); }
+.fia-preview .down { color: var(--red); font-family: var(--mono); }
+
+.fia-form { border: 1px solid var(--panel-rule); padding: 18px; display: grid; gap: 14px; }
+.fia-form > label { display: grid; gap: 6px; }
