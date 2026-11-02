@@ -1185,15 +1185,23 @@
     });
   }
 
+  // The desk is not a section of the page, it replaces it. body[data-fia="on"]
+  // is what hides everything else (see the "desk replaces the page" rule in
+  // style.css); without it the panel renders far down the normal site and
+  // looks like it never opened.
   function syncFromHash() {
     const on = location.hash.toLowerCase() === HASH;
+    document.body.dataset.fia = on ? "on" : "";
     section.hidden = !on;
     if (!on) return;
+    window.scrollTo({ top: 0 });
     if (isOpen()) {
       setMode(true);
       if (!state.loaded) load();
     } else {
       setMode(false);
+      const input = $("fia-password");
+      if (input) input.focus();
     }
   }
 
