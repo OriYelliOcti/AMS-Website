@@ -125,10 +125,11 @@
         for (const slot of team.slots || []) {
           for (const member of slot.members || []) {
             if (member.bot) continue;
-            const slotName = String(slot.slot || "Other");
-            // Race seats only: no team bosses, principals, pit crew or other
-            // officials. A reserve is a stand-in, not a driver on the grid.
-            if (slotName.trim().toLowerCase() !== "driver") continue;
+            const slotName = String(slot.slot || "Other").trim();
+            const seat = slotName.toLowerCase();
+            // Race seats only: drivers and the reserves who stand in for them.
+            // No team bosses, principals, pit crew or other officials.
+            if (seat !== "driver" && seat !== "reserve") continue;
             const entry = {
               name: text(member.name),
               username: text(member.username),
@@ -139,7 +140,12 @@
               source: "lineup",
             };
             const key = (entry.username || entry.name).toLowerCase();
-            if (!byKey.has(key)) byKey.set(key, entry);
+            const seen = byKey.get(key);
+            // Someone listed as a reserve in one team and a driver in another
+            // keeps the driver seat.
+            if (!seen || (seen.slot.toLowerCase() === "reserve" && seat === "driver")) {
+              byKey.set(key, entry);
+            }
           }
         }
       }
@@ -478,7 +484,7 @@
         <input type="search" data-action="search" value="${esc(state.search)}" placeholder="Search every driver, any division" spellcheck="false">
         <div class="fia-chips">${counts}</div>
       </div>
-      <p class="fia-hint">Race drivers only — team bosses, principals, pit crew and other officials are not listed. Anyone who only exists in a recorded result is kept.</p>
+      <p class="fia-hint">Race drivers and reserves — team bosses, principals, pit crew and other officials are not listed. Anyone who only exists in a recorded result is kept.</p>
       <table class="fia-grid">
         <thead><tr><th></th><th>Driver</th><th>Division</th><th>Team</th><th>Seat</th></tr></thead>
         <tbody>${rows.map((driver) => `
@@ -487,7 +493,11 @@
             <td><b>${esc(driver.name)}</b><br><span class="fia-sub">@${esc(driver.username || "—")}</span></td>
             <td>${esc(driver.division)}</td>
             <td>${esc(driver.team || "—")}</td>
-            <td>${driver.source === "result" ? '<span class="fia-chip fia-chip-warn">result only</span>' : esc(driver.slot)}</td>
+            <td>${driver.source === "result"
+              ? '<span class="fia-chip fia-chip-warn">result only</span>'
+              : driver.slot.toLowerCase() === "reserve"
+                ? '<span class="fia-chip">reserve</span>'
+                : esc(driver.slot)}</td>
           </tr>`).join("") || '<tr><td colspan="5" class="fia-note">Nobody matches that search.</td></tr>'}</tbody>
       </table>
       <p class="fia-note">${rows.length} of ${state.drivers.length} drivers shown.</p>
