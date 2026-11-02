@@ -1,13 +1,19 @@
-// FIA race-control desk. Reached only at #ams-FIA, never linked from the page.
+// FIA race-control desk — rebuilt.
 //
-// This is the write side of the site: rounds, steward decisions, clips and the
-// published championship tables. Everything is edited in the browser as a draft
-// and committed to the site repo through the GitHub Contents API with a token
-// the steward pastes in once per tab — no server, no shared secret in the page.
+// Three things changed from the old desk:
 //
-// The access code is held as a SHA-256 digest, not as text. That is concealment,
-// not security: anyone reading this file sees how the check works. What protects
-// the league is that publishing needs a GitHub token that never lives here.
+//  1. Every driver in the league is available, from every division. Rounds get
+//     raced cross-division (an F2 driver can take an F1 seat for a night), so
+//     the grid editor no longer hides anyone behind a division filter.
+//  2. The finishing order is pasted the way the timing screen prints it —
+//     "Jamie LEADER", "Jeffz + 4.283", "Yoke + 1 LAP" — and parsed here.
+//  3. Publishing no longer needs a GitHub token in the browser. It posts the
+//     document to a small bridge on the laptop (desk_bridge.py), which holds
+//     the token and commits through the site repo's own path.
+//
+// The access code is still a SHA-256 digest: concealment, not security. What
+// protects the league is that publishing needs the bridge token, which lives
+// on the laptop and never in this file.
 (() => {
   "use strict";
 
@@ -18,36 +24,37 @@
   const HASH = "#ams-fia";
   const CODE_SHA256 = "387212a44247c12e2829f6f4c49c22c053ca58bba77bcd613d441bac4c716741";
   const UNLOCK_KEY = "ams-fia-unlocked";
-  const TOKEN_KEY = "ams-fia-token";
-  const API = "https://api.github.com";
+  const BRIDGE_KEY = "ams-fia-bridge";
+  const BRIDGE_TOKEN_KEY = "ams-fia-bridge-token";
+  const AUTHOR_KEY = "ams-fia-author";
+  const DEFAULT_BRIDGE = "http://127.0.0.1:8802";
   const RESULTS_PATH = "data/results.json";
-  const LINEUPS_URL = "data/lineups.json";
-  const DEFAULT_REPO = "OriYelliOcti/AMS-Website";
-  const DEFAULT_BRANCH = "main";
+  const LINEUPS_PATH = "data/lineups.json";
   const LOCALE = "en-GB";
-  const ROSTER_SLOTS = ["Driver", "Reserve", "Other"];
+  // Matches FASTEST_LAP_POINT in the bot's .env (default 1).
+  const FL_POINT = 1;
 
   const $ = (id) => document.getElementById(id);
   const publicTitle = document.title;
 
   const state = {
     loaded: false,
+    published: null,
     doc: null,
-    publishedText: "",
     dirty: false,
     busy: false,
     view: "rounds",
     division: null,
-    standingsDivision: null,
-    edit: null,
-    penalty: null,
-    clip: null,
-    confirm: null,
-    token: sessionStorage.getItem(TOKEN_KEY) || "",
-    repo: localStorage.getItem("ams-fia-repo") || DEFAULT_REPO,
-    branch: localStorage.getItem("ams-fia-branch") || DEFAULT_BRANCH,
-    author: localStorage.getItem("ams-fia-author") || "",
+    round: null,
+    grid: null,
+    gridPaste: "",
+    search: "",
+    preview: null,
+    bridge: sessionStorage.getItem(BRIDGE_KEY) || DEFAULT_BRIDGE,
+    bridgeToken: sessionStorage.getItem(BRIDGE_TOKEN_KEY) || "",
+    author: localStorage.getItem(AUTHOR_KEY) || "",
     lineups: null,
+    drivers: [],
   };
 
   // Helpers ----------------------------------------------------------------- //
@@ -58,1295 +65,1138 @@
     ));
   }
 
+  const text = (value) => String(value ?? "").trim();
+
   function initials(name) {
-    const cleaned = String(name).replace(/[^\p{L}\p{N} ]/gu, " ").trim();
-    const parts = cleaned.split(/\s+/).filter(Boolean);
-    if (!parts.length) return "?";
-    return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
+    const parts = String(name || "?").replace(/[^\p{L}\p{N}\s|]/gu, " ").split(/[\s|]+/).filter(Boolean);
+    const picks = parts.length > 1 ? [parts[0], parts[parts.length - 1]] : parts;
+    return picks.map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "?";
   }
 
-  async function digest(text) {
-    const bytes = new TextEncoder().encode(text);
+  async function digest(value) {
+    const bytes = new TextEncoder().encode(value);
     const hash = await crypto.subtle.digest("SHA-256", bytes);
-    return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    return Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
   function stamp(iso) {
     if (!iso) return "never";
     const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return "unknown";
-    return date.toLocaleString(LOCALE, { dateStyle: "medium", timeStyle: "short" });
+    if (Number.isNaN(date.getTime())) return String(iso);
+    return date.toLocaleString(LOCALE, {
+      day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+    });
   }
 
-  function say(text, isError) {
-    const note = $("fia-status");
-    note.textContent = text;
-    note.classList.toggle("error", Boolean(isError));
+  function say(message, isError = false) {
+    const node = $("fia-status");
+    if (!node) return;
+    node.textContent = message;
+    node.classList.toggle("error", !!isError);
   }
 
-  function serialize(doc) {
-    return `${JSON.stringify(doc, null, 1)}\n`;
-  }
+  // Drivers ----------------------------------------------------------------- //
 
-  function toBase64(text) {
-    const bytes = new TextEncoder().encode(text);
-    let binary = "";
-    for (let index = 0; index < bytes.length; index += 0x8000) {
-      binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000));
+  // "ASTO | Jamie" -> asto, jamie; "Jeffz | TGR | 99" -> jeffz, tgr, 99.
+  // Every segment is a handle a steward might type, which is how a pasted
+  // timing sheet resolves without anyone being renamed first.
+  function keysFor(driver) {
+    const keys = new Set();
+    const add = (value) => {
+      const clean = String(value || "").trim().toLowerCase();
+      if (clean) keys.add(clean);
+    };
+    add(driver.username);
+    add(driver.name);
+    for (const segment of String(driver.name || "").split("|")) {
+      add(segment.replace(/^[#\s]+/, ""));
+      add(segment.replace(/[^\p{L}\p{N}]/gu, ""));
     }
-    return btoa(binary);
+    if (driver.username) add(String(driver.username).replace(/[^\p{L}\p{N}]/gu, ""));
+    return Array.from(keys).filter((key) => key.length > 1);
   }
 
-  function slug(value) {
-    return String(value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  }
+  const SLOT_RANK = { Driver: 0, Reserve: 1, Other: 2 };
+  const STAFF = /boss|principal|manager|pit crew|steward|owner|admin|coach/i;
 
-  function author() {
-    return state.author.trim() || "FIA desk";
-  }
+  function buildDrivers() {
+    const byKey = new Map();
+    for (const division of state.lineups?.divisions || []) {
+      const divisionName = String(division.name || "").toUpperCase();
+      for (const team of division.teams || []) {
+        for (const slot of team.slots || []) {
+          for (const member of slot.members || []) {
+            if (member.bot) continue;
+            const slotName = String(slot.slot || "Other");
+            const entry = {
+              name: text(member.name),
+              username: text(member.username),
+              team: text(team.short || team.name),
+              teamFull: text(team.name),
+              division: divisionName,
+              slot: slotName,
+              staff: STAFF.test(slotName),
+              source: "lineup",
+            };
+            const key = (entry.username || entry.name).toLowerCase();
+            const seen = byKey.get(key);
+            if (!seen) {
+              byKey.set(key, entry);
+              continue;
+            }
+            const rank = (SLOT_RANK[entry.slot] ?? 3) + (entry.staff ? 10 : 0);
+            const oldRank = (SLOT_RANK[seen.slot] ?? 3) + (seen.staff ? 10 : 0);
+            if (rank < oldRank) byKey.set(key, entry);
+          }
+        }
+      }
+    }
 
-  // Data -------------------------------------------------------------------- //
-
-  async function fetchJson(url) {
-    const response = await fetch(`${url}?t=${Date.now()}`, { cache: "no-store" });
-    if (response.status === 404) return null;
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-  }
-
-  async function load(force) {
-    if (state.loaded && !force) return;
-    const [lineups, results] = await Promise.all([
-      fetchJson(LINEUPS_URL).catch(() => null),
-      fetchJson(RESULTS_PATH).catch(() => null),
-    ]);
-    state.lineups = lineups;
-    state.doc = CORE.normalizeDocument(results ?? CORE.emptyDocument("Season 1"));
-    state.publishedText = serialize(state.doc);
-    state.loaded = true;
-    state.dirty = false;
-    if (!results) say("No results are published yet — this desk will create the first one.", false);
-  }
-
-  function markDirty() {
-    state.dirty = serialize(state.doc) !== state.publishedText;
-    renderChrome();
-  }
-
-  function divisions() {
-    return state.doc?.divisions ?? [];
-  }
-
-  function divisionNames() {
-    const names = divisions().map((division) => division.name).filter(Boolean);
-    for (const name of CORE.DIVISION_ORDER) if (!names.includes(name)) names.push(name);
-    return names;
-  }
-
-  // Everyone on a team in this division is selectable as a driver, not only the
-  // Driver/Reserve seats: stewards record a result for whoever actually raced,
-  // and a crew member or boss standing in must not be missing from the list. A
-  // racing seat wins when somebody holds two roles, and the slot is shown so a
-  // staff name is not mistaken for a seat.
-  function roster(division) {
-    const entry = (state.lineups?.divisions ?? []).find(
-      (item) => String(item?.name ?? "").toUpperCase() === String(division ?? "").toUpperCase(),
-    );
-    const people = new Map();
-    for (const team of entry?.teams ?? []) {
-      for (const slot of team.slots ?? []) {
-        const racing = ROSTER_SLOTS.includes(slot.slot);
-        for (const person of slot.members ?? []) {
-          if (!person?.username || person.bot) continue;
-          const held = people.get(person.username);
-          if (held && (held.racing || !racing)) continue;
-          people.set(person.username, {
-            name: person.name,
-            username: person.username,
-            team: team.short || team.name,
-            slot: slot.slot,
-            racing,
+    // Anyone in a recorded result but not in the lineups (a guest, a driver
+    // whose role was removed) stays visible — that is exactly the gap that
+    // made three of seven drivers unfindable in the old grid.
+    for (const division of state.doc?.divisions || []) {
+      for (const round of division.rounds || []) {
+        for (const entry of round.classification || []) {
+          const key = (entry.username || entry.name || "").toLowerCase();
+          if (!key || byKey.has(key)) continue;
+          byKey.set(key, {
+            name: text(entry.name),
+            username: text(entry.username),
+            team: text(entry.short || entry.team),
+            teamFull: text(entry.team),
+            division: String(division.name || "").toUpperCase(),
+            slot: "Result only",
+            staff: false,
+            source: "result",
           });
         }
       }
     }
-    return people;
+
+    state.drivers = Array.from(byKey.values()).sort((a, b) => {
+      const div = CORE.DIVISION_ORDER.indexOf(a.division) - CORE.DIVISION_ORDER.indexOf(b.division);
+      if (div) return div;
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+    return state.drivers;
   }
 
-  function rosterLabel(person) {
-    return person.racing
-      ? `${person.name} (${person.team})`
-      : `${person.name} (${person.team} · ${person.slot})`;
-  }
-
-  function personOf(entry) {
-    if (!entry) return null;
-    return {
-      name: entry.name,
-      username: entry.username,
-      team: entry.short || entry.team || "",
-    };
-  }
-
-  function roundsOf(division) {
-    return [...(division?.rounds ?? [])].sort((a, b) => CORE.num(b.round, 0) - CORE.num(a.round, 0));
-  }
-
-  function allRounds() {
-    const rows = [];
-    for (const division of divisions()) {
-      for (const round of roundsOf(division)) rows.push({ division: division.name, round });
-    }
-    return rows;
-  }
-
-  function decisionsOf(division) {
-    const rows = [];
-    for (const round of roundsOf(division)) {
-      for (const penalty of CORE.penaltiesOf(round)) {
-        rows.push({ division: division.name, round: round.round, circuit: round.circuit, penalty });
+  function resolveDriver(value) {
+    const needle = text(value).toLowerCase();
+    if (!needle) return null;
+    let best = null;
+    let bestScore = 0;
+    for (const driver of state.drivers) {
+      for (const key of keysFor(driver)) {
+        let score = 0;
+        if (key === needle) score = 4;
+        else if (key.startsWith(needle)) score = 3;
+        else if (needle.includes(key) && key.length > 2) score = 2;
+        else if (key.includes(needle)) score = 1;
+        if (score > bestScore) {
+          bestScore = score;
+          best = driver;
+        }
       }
     }
+    return bestScore ? best : null;
+  }
+
+  // Finishing order parsing -------------------------------------------------- //
+
+  // "1. Jamie LEADER" -> { name: "Jamie", gap: "LEADER", dnf: false }
+  // A trailing number only counts as a gap when it looks like one: a leading
+  // "+", a colon or a decimal, or the words LEADER / LAP. That stops
+  // "Jeffz | TGR | 99" from being read as a 99-second gap.
+  function parseLine(raw) {
+    let line = String(raw || "").trim();
+    if (!line || line.startsWith("#")) return null;
+
+    line = line.replace(/^(?:p|pos(?:ition)?\.?\s*)?\d{1,2}\s*[.)\-–—]\s*/i, "").trim();
+
+    let dnf = false;
+    const dnfMatch = line.match(/[\s\-–—(]*\b(DNF|DNS|DSQ|RET|RETIRED)\b\)?\s*$/i);
+    if (dnfMatch) {
+      dnf = true;
+      line = line.slice(0, dnfMatch.index).trim();
+    }
+
+    let gap = "";
+    const leader = line.match(/\s+\b(LEADER|WINNER)\b\s*$/i);
+    if (leader) {
+      gap = "LEADER";
+      line = line.slice(0, leader.index).trim();
+    } else {
+      const numeric = line.match(/\s+\+?\s*((?:\d+:)?\d+(?:[.,]\d+)?(?:\s*laps?)?|\d*\s*laps?)\s*$/i);
+      if (numeric) {
+        const captured = numeric[1].trim();
+        const looksLikeGap = /\+/.test(line.slice(numeric.index))
+          || /[:.,]/.test(captured)
+          || /lap/i.test(captured);
+        if (looksLikeGap) {
+          gap = `+${captured.replace(/\s+/g, " ").replace(/^\+/, "")}`;
+          line = line.slice(0, numeric.index).trim();
+        }
+      }
+    }
+
+    if (!line) return null;
+    return { name: line, gap, dnf };
+  }
+
+  function parseGrid(source) {
+    const rows = [];
+    for (const raw of String(source || "").split(/\r?\n/)) {
+      const parsed = parseLine(raw);
+      if (!parsed) continue;
+      const driver = resolveDriver(parsed.name);
+      rows.push({
+        name: driver ? driver.name : parsed.name,
+        username: driver ? driver.username : "",
+        team: driver ? driver.team : "",
+        division: driver ? driver.division : "",
+        matched: !!driver,
+        gap: parsed.gap,
+        dnf: parsed.dnf,
+      });
+    }
     return rows;
   }
 
-  function clips() {
-    return [...(state.doc?.media ?? [])].sort((a, b) => (
-      String(b.added_at ?? "").localeCompare(String(a.added_at ?? ""))
-    ));
+  // Document access ---------------------------------------------------------- //
+
+  function divisions() {
+    return (state.doc?.divisions || []).map((division) => String(division.name || "").toUpperCase());
   }
 
-  // Chrome ------------------------------------------------------------------ //
+  function divisionEntry(name) {
+    return CORE.ensureDivision(state.doc, String(name || "").toUpperCase());
+  }
+
+  function roundsOf(name) {
+    const entry = (state.doc?.divisions || []).find(
+      (division) => String(division.name || "").toUpperCase() === String(name || "").toUpperCase()
+    );
+    return entry ? entry.rounds || [] : [];
+  }
+
+  function roundOf(divisionName, number) {
+    return roundsOf(divisionName).find((round) => Number(round.round) === Number(number)) || null;
+  }
+
+  function slug(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  // Load --------------------------------------------------------------------- //
+
+  async function fetchJson(path) {
+    const response = await fetch(`${path}?t=${Date.now()}`, { cache: "no-store" });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  }
+
+  async function load(force = false) {
+    if (state.loaded && !force) return;
+    say("Loading the published season…");
+    try {
+      const [results, lineups] = await Promise.all([
+        fetchJson(RESULTS_PATH),
+        fetchJson(LINEUPS_PATH),
+      ]);
+      state.lineups = lineups || { divisions: [] };
+      state.published = CORE.normalizeDocument(results || CORE.emptyDocument("Season 1"));
+      state.doc = JSON.parse(JSON.stringify(state.published));
+      state.loaded = true;
+      state.dirty = false;
+      state.preview = null;
+      if (!state.division) state.division = divisions()[0] || CORE.DIVISION_ORDER[0];
+      buildDrivers();
+      say(`Season loaded — ${state.drivers.length} drivers on file.`);
+    } catch (error) {
+      say(`Could not load the season: ${error.message}`, true);
+    }
+    render();
+  }
+
+  // Rendering ---------------------------------------------------------------- //
 
   function renderChrome() {
-    const totalRounds = allRounds().length;
-    const totalDecisions = divisions().reduce((sum, division) => sum + decisionsOf(division).length, 0);
-    const totalClips = clips().length;
-    const updated = state.doc?.updated_at ? stamp(state.doc.updated_at) : "never";
-
-    $("fia-meta").innerHTML = [
-      ["Rounds", String(totalRounds)],
-      ["Decisions", String(totalDecisions)],
-      ["Clips", String(totalClips)],
-      ["Last published", updated],
-    ].map(([label, value]) => `<div class="fia-stat"><span>${esc(label)}</span><b>${esc(value)}</b></div>`).join("");
-
     const dirty = $("fia-dirty");
-    dirty.hidden = !state.dirty;
-    $("fia-discard").hidden = !state.dirty;
-    $("fia-publish").disabled = state.busy;
-
-    for (const button of document.querySelectorAll("#fia-nav button")) {
+    if (dirty) dirty.hidden = !state.dirty;
+    const discard = $("fia-discard");
+    if (discard) discard.hidden = !state.dirty;
+    const publishButton = $("fia-publish");
+    if (publishButton) publishButton.disabled = state.busy || !state.dirty;
+    for (const button of section.querySelectorAll("[data-view]")) {
       button.setAttribute("aria-pressed", String(button.dataset.view === state.view));
     }
+    const meta = $("fia-meta");
+    if (!meta) return;
+    const rounds = (state.doc?.divisions || []).reduce((sum, division) => sum + (division.rounds || []).length, 0);
+    const decisions = (state.doc?.divisions || []).reduce(
+      (sum, division) => sum + (division.rounds || []).reduce(
+        (inner, round) => inner + (round.penalties || []).length, 0
+      ), 0
+    );
+    meta.innerHTML = [
+      ["Season", esc(state.doc?.season || "—")],
+      ["Rounds", String(rounds)],
+      ["Decisions", String(decisions)],
+      ["Drivers", String(state.drivers.length)],
+      ["Published", esc(stamp(state.published?.updated_at))],
+    ].map(([label, value]) => `<div class="fia-stat"><span>${label}</span><b>${value}</b></div>`).join("");
   }
-
-  function options(values, selected, placeholder) {
-    const head = placeholder === undefined ? "" : `<option value="">${esc(placeholder)}</option>`;
-    return head + values.map(([value, label]) => (
-      `<option value="${esc(value)}"${String(value) === String(selected ?? "") ? " selected" : ""}>${esc(label)}</option>`
-    )).join("");
-  }
-
-  function divisionNav(current, action) {
-    return divisionNames().map((name) => (
-      `<button type="button" data-action="${action}" data-division="${esc(name)}" aria-pressed="${name === current}">${esc(name)}</button>`
-    )).join("");
-  }
-
-  // Views ------------------------------------------------------------------- //
 
   function render() {
-    if (!state.doc) return;
     renderChrome();
     const view = $("fia-view");
-    if (state.view === "rounds") view.innerHTML = roundsView();
-    else if (state.view === "decisions") view.innerHTML = decisionsView();
-    else if (state.view === "clips") view.innerHTML = clipsView();
-    else if (state.view === "standings") view.innerHTML = standingsView();
-    else if (state.view === "squad") view.innerHTML = squadView();
-    else view.innerHTML = activityView();
+    if (!view) return;
+    if (!state.loaded) {
+      view.innerHTML = '<p class="fia-note">Nothing loaded yet.</p>';
+      return;
+    }
+    const builders = {
+      rounds: roundsView,
+      drivers: driversView,
+      decisions: decisionsView,
+      standings: standingsView,
+      audit: auditView,
+    };
+    view.innerHTML = (builders[state.view] || roundsView)();
   }
+
+  function divisionNav() {
+    const names = divisions();
+    if (!names.length) return '<p class="fia-note">No division has a round yet.</p>';
+    return `<div class="fia-nav fia-nav-inline">${names.map((name) => (
+      `<button type="button" data-action="division" data-division="${esc(name)}" aria-pressed="${name === state.division}">${esc(name)}</button>`
+    )).join("")}</div>`;
+  }
+
+  function optionList(entries, selected, placeholder) {
+    const head = placeholder ? `<option value="">${esc(placeholder)}</option>` : "";
+    return head + entries.map((entry) => (
+      `<option value="${esc(entry.id)}"${String(entry.id) === String(selected) ? " selected" : ""}>${esc(entry.label)}</option>`
+    )).join("");
+  }
+
+  // Rounds view -------------------------------------------------------------- //
 
   function roundsView() {
-    if (state.edit) return roundForm();
-    const current = state.division ?? divisions()[0]?.name ?? CORE.DIVISION_ORDER[0];
-    state.division = current;
-    const division = CORE.divisionEntry(state.doc, current);
-    const rounds = division ? roundsOf(division) : [];
+    const division = state.division || divisions()[0];
+    const rounds = roundsOf(division);
+    const chips = rounds.map((round) => (
+      `<button type="button" data-action="open-round" data-round="${round.round}" aria-pressed="${Number(state.round) === Number(round.round)}">R${esc(round.round)}${round.circuit ? ` · ${esc(round.circuit)}` : ""}</button>`
+    )).join("");
 
-    const cards = rounds.length ? rounds.map((round) => {
-      const summary = CORE.roundSummary(round);
-      const key = `${current}:${round.round}`;
-      const confirming = state.confirm === key;
-      return `<article class="fia-card">
-        <header>
-          <h4>Round ${esc(round.round)}${round.circuit ? ` — ${esc(round.circuit)}` : ""}</h4>
-          <p>${esc(current)} · ${summary.classified} classified${summary.retired ? ` · ${summary.retired} retired` : ""} · ${summary.decisions} decision${summary.decisions === 1 ? "" : "s"}</p>
-        </header>
-        <div class="fia-actions">
-          <button type="button" class="action" data-action="edit-round" data-division="${esc(current)}" data-round="${esc(round.round)}">Edit</button>
-          ${confirming
-            ? `<button type="button" class="action fia-danger" data-action="confirm-delete" data-division="${esc(current)}" data-round="${esc(round.round)}">Delete round</button>
-               <button type="button" class="action" data-action="cancel-delete">Keep</button>`
-            : `<button type="button" class="action" data-action="delete-round" data-division="${esc(current)}" data-round="${esc(round.round)}">Delete</button>`}
-        </div>
-      </article>`;
-    }).join("") : `<p class="empty-line">No ${esc(current)} rounds yet — start with a new round.</p>`;
-
-    return `<div class="fia-section-head">
-        <h3>Rounds</h3>
-        <button type="button" class="action action-solid" data-action="new-round">New round</button>
+    return `
+      <div class="fia-toolbar-row">
+        ${divisionNav()}
+        <button type="button" class="action" data-action="new-round">New round</button>
       </div>
-      <div class="fia-filters" role="group" aria-label="Division">${divisionNav(current, "show-division")}</div>
-      <div class="fia-cards">${cards}</div>`;
+      <div class="fia-nav fia-nav-inline fia-roundnav">${chips || '<span class="fia-note">No round recorded in this division yet.</span>'}</div>
+      ${state.grid ? gridEditor(division) : '<p class="fia-note">Pick a round above, or start a new one.</p>'}
+      ${state.preview ? previewBlock() : ""}
+    `;
   }
 
-  function roundForm() {
-    const edit = state.edit;
-    const table = CORE.pointsTable(CORE.divisionEntry(state.doc, edit.division) ?? {});
-    const people = roster(edit.division);
-    const used = new Set(edit.entries.map((entry) => entry.username));
-    const bySeat = (a, b) => {
-      if (a.racing !== b.racing) return a.racing ? -1 : 1;
-      return a.name.localeCompare(b.name, LOCALE);
-    };
-    const available = [...people.values()]
-      .filter((person) => !used.has(person.username))
-      .sort(bySeat);
-    const everyone = [...people.values()].sort(bySeat);
-    const seats = [...people.values()].filter((person) => person.racing).length;
+  function gridEditor(division) {
+    const grid = state.grid;
+    const driverOptions = state.drivers.map((driver) => ({
+      id: driver.username || driver.name,
+      label: `${driver.name} · ${driver.division} · ${driver.team || "no team"}`,
+    }));
 
-    let position = 0;
-    const rows = edit.entries.map((entry, index) => {
-      const retired = entry.status === "retired";
-      if (!retired) position += 1;
-      const scored = retired ? 0 : CORE.pointsFor(table, position);
-      const driverOptions = options(
-        everyone.map((person) => [person.username, rosterLabel(person)]),
-        entry.username,
-        "— driver —",
-      );
-      const extra = people.has(entry.username)
-        ? ""
-        : `<option value="${esc(entry.username)}" selected>${esc(entry.name)} (not on the roster)</option>`;
-      return `<li class="fia-order-row">
-        <span class="fia-pos">${retired ? "DNF" : `P${position}`}</span>
-        <select data-entry-driver data-index="${index}" aria-label="Driver in position ${index + 1}">${driverOptions}${extra}</select>
-        <span class="fia-team">${esc(entry.team)}</span>
-        <select data-entry-status data-index="${index}" aria-label="Status for ${esc(entry.name)}" class="fia-status-select">
-          <option value="classified"${retired ? "" : " selected"}>Classified</option>
-          <option value="retired"${retired ? " selected" : ""}>Retired</option>
-        </select>
-        <span class="fia-pts">${scored} pts</span>
-        <span class="fia-order-actions">
-          <button type="button" data-action="entry-up" data-index="${index}" aria-label="Move up"${index === 0 ? " disabled" : ""}>↑</button>
-          <button type="button" data-action="entry-down" data-index="${index}" aria-label="Move down"${index === edit.entries.length - 1 ? " disabled" : ""}>↓</button>
-          <button type="button" data-action="entry-remove" data-index="${index}" aria-label="Remove">×</button>
-        </span>
-      </li>`;
+    const rows = grid.entries.map((entry, index) => {
+      const key = entry.username || "";
+      const known = state.drivers.some((driver) => (driver.username || driver.name) === key);
+      const selected = known ? key : "";
+      const extra = known ? "" : `<option value="" selected>${esc(entry.name || "— pick a driver —")}${entry.name ? " (not in lineups)" : ""}</option>`;
+      return `
+        <tr class="${entry.dnf ? "is-dnf" : ""} ${entry.matched === false ? "is-unknown" : ""}">
+          <td class="fia-pos">${entry.dnf ? "—" : index + 1}</td>
+          <td><select data-action="driver" data-index="${index}">${extra}${optionList(driverOptions, selected, "— pick a driver —")}</select></td>
+          <td><input type="text" data-action="gap" data-index="${index}" value="${esc(entry.gap)}" placeholder="+0.000" spellcheck="false"></td>
+          <td class="fia-toggle"><label><input type="checkbox" data-action="dnf" data-index="${index}"${entry.dnf ? " checked" : ""}> DNF</label></td>
+          <td class="fia-rowtools">
+            <button type="button" data-action="move" data-index="${index}" data-direction="-1" title="Move up"${index === 0 ? " disabled" : ""}>↑</button>
+            <button type="button" data-action="move" data-index="${index}" data-direction="1" title="Move down"${index === grid.entries.length - 1 ? " disabled" : ""}>↓</button>
+            <button type="button" data-action="remove-entry" data-index="${index}" title="Remove">✕</button>
+          </td>
+        </tr>`;
     }).join("");
 
-    const finishers = edit.entries
-      .filter((entry) => entry.status !== "retired")
-      .map((entry) => [entry.username, entry.name]);
-    const addOptions = available.map((person) => [person.username, rosterLabel(person)]);
+    const inGrid = grid.entries
+      .filter((entry) => entry.name)
+      .map((entry) => ({ id: entry.username || entry.name, label: entry.name }));
+    const table = CORE.pointsTable(divisionEntry(division));
 
-    return `<div class="fia-section-head">
-        <h3>${edit.mode === "new" ? "New round" : "Edit round"}</h3>
-        <button type="button" class="action" data-action="cancel-edit">Back</button>
+    return `
+      <div class="fia-roundedit">
+        <div class="fia-form-grid">
+          <label>Division<input type="text" value="${esc(grid.division)}" readonly></label>
+          <label>Round<input type="number" min="1" max="99" data-action="round-number" value="${esc(grid.round)}"></label>
+          <label>Circuit<input type="text" data-action="circuit" value="${esc(grid.circuit)}" placeholder="Bahrain International Circuit" spellcheck="false"></label>
+          <label>Pole sitter<select data-action="pole">${optionList(inGrid, grid.pole, "— none —")}</select></label>
+          <label>Fastest lap<select data-action="fastest">${optionList(inGrid, grid.fastest, "— none —")}</select></label>
+        </div>
+
+        <div class="fia-paste">
+          <label for="fia-paste-box">Paste the timing sheet</label>
+          <textarea id="fia-paste-box" data-action="paste" rows="5" spellcheck="false" placeholder="1. Jamie LEADER&#10;2. Jeffz + 4.283&#10;3. Yoke + 1 LAP&#10;- Theo DNF">${esc(state.gridPaste)}</textarea>
+          <div class="fia-actions">
+            <button type="button" class="action action-solid" data-action="parse-grid">Parse into the grid</button>
+            <span class="fia-hint">Numbering, <code>LEADER</code>, <code>+ 4.283</code>, <code>+ 1 LAP</code> and <code>DNF</code> are all understood.</span>
+          </div>
+        </div>
+
+        <table class="fia-grid">
+          <thead><tr><th>P</th><th>Driver</th><th>Gap</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="5" class="fia-note">No entries yet — parse a timing sheet or add a driver.</td></tr>'}</tbody>
+        </table>
+
+        <div class="fia-actions">
+          <button type="button" class="action" data-action="add-entry">Add driver</button>
+          <button type="button" class="action action-solid" data-action="save-grid">Save round to draft</button>
+          <button type="button" class="action" data-action="discard-grid">Close</button>
+          ${roundOf(division, grid.round) ? '<button type="button" class="action fia-danger" data-action="delete-round">Delete round</button>' : ""}
+        </div>
+        <p class="fia-hint">Points: ${table.join(" · ")}. A DNF keeps the start but scores nothing.</p>
       </div>
-      <form class="fia-form" id="fia-round-form">
-        <div class="fia-form-grid">
-          <label>Division<select data-edit="division"${edit.mode === "new" ? "" : " disabled"}>
-            ${options(divisionNames().map((name) => [name, name]), edit.division)}
-          </select></label>
-          <label>Round<input type="number" min="1" max="99" data-edit="round" value="${esc(edit.round)}"></label>
-          <label>Circuit<input type="text" data-edit="circuit" value="${esc(edit.circuit)}" placeholder="Monza"></label>
-        </div>
-
-        <h4>Classification</h4>
-        <ol class="fia-order">${rows || '<li class="empty-line">Nobody yet — add the first driver below.</li>'}</ol>
-        <div class="fia-actions">
-          <select id="fia-add-driver" aria-label="Driver to add">${options(addOptions, "", "— add a driver —")}</select>
-          <button type="button" class="action" data-action="entry-add">Add driver</button>
-        </div>
-        <p class="fia-hint">${everyone.length} people on the ${esc(edit.division)} roster — ${seats} racing seats first, then staff and crew, so a stand-in is never missing.</p>
-
-        <div class="fia-form-grid">
-          <label>Pole<select data-edit="pole">${options(finishers, edit.pole, "— none —")}</select></label>
-          <label>Fastest lap<select data-edit="fastest">${options(finishers, edit.fastest, "— none —")}</select></label>
-        </div>
-
-        <p class="fia-hint">Positions are numbered from this order, skipping retirements. Points come from the division table; fastest lap is already included by the bot when it records a round — add it here with the position that was scored.</p>
-        <div class="fia-actions">
-          <button type="submit" class="action action-solid">Save round</button>
-          <button type="button" class="action" data-action="cancel-edit">Cancel</button>
-        </div>
-      </form>`;
+    `;
   }
+
+  // Drivers view ------------------------------------------------------------- //
+
+  function driversView() {
+    const needle = state.search.trim().toLowerCase();
+    const rows = state.drivers.filter((driver) => {
+      if (!needle) return true;
+      return `${driver.name} ${driver.username} ${driver.team} ${driver.division}`.toLowerCase().includes(needle);
+    });
+    const counts = CORE.DIVISION_ORDER.map((name) => (
+      `<span class="fia-chip">${esc(name)} ${state.drivers.filter((driver) => driver.division === name).length}</span>`
+    )).join(" ");
+
+    return `
+      <div class="fia-toolbar-row">
+        <input type="search" data-action="search" value="${esc(state.search)}" placeholder="Search every driver, any division" spellcheck="false">
+        <div class="fia-chips">${counts}</div>
+      </div>
+      <p class="fia-hint">Everyone on a team, plus anyone who only exists in a recorded result. Staff seats are marked, not hidden.</p>
+      <table class="fia-grid">
+        <thead><tr><th></th><th>Driver</th><th>Division</th><th>Team</th><th>Seat</th></tr></thead>
+        <tbody>${rows.map((driver) => `
+          <tr>
+            <td class="fia-avatar">${esc(initials(driver.name))}</td>
+            <td><b>${esc(driver.name)}</b><br><span class="fia-sub">@${esc(driver.username || "—")}</span></td>
+            <td>${esc(driver.division)}</td>
+            <td>${esc(driver.team || "—")}</td>
+            <td>${esc(driver.slot)}${driver.source === "result" ? ' <span class="fia-chip fia-chip-warn">result only</span>' : ""}</td>
+          </tr>`).join("") || '<tr><td colspan="5" class="fia-note">Nobody matches that search.</td></tr>'}</tbody>
+      </table>
+      <p class="fia-note">${rows.length} of ${state.drivers.length} drivers shown.</p>
+    `;
+  }
+
+  // Decisions view ----------------------------------------------------------- //
 
   function decisionsView() {
-    const editing = state.penalty;
-    const divisionName = editing?.division ?? state.division ?? divisions()[0]?.name ?? CORE.DIVISION_ORDER[0];
-    const division = CORE.divisionEntry(state.doc, divisionName);
-    const rounds = division ? roundsOf(division) : [];
-    const roundNumber = editing?.round ?? rounds[0]?.round ?? "";
-    const round = rounds.find((item) => CORE.num(item.round, -1) === CORE.num(roundNumber, -2));
-    const type = CORE.penaltyType(editing?.type ?? "points");
-    const people = round ? roster(divisionName) : new Map();
-    for (const entry of round?.classification ?? []) {
-      if (entry?.username && !people.has(entry.username)) {
-        people.set(entry.username, { name: entry.name, username: entry.username, team: entry.short || entry.team || "" });
-      }
-    }
-    // Drivers who actually raced this round come first: the steward's usual job
-    // is one of the people already in that classification.
-    const raced = new Set((round?.classification ?? []).map((entry) => entry?.username).filter(Boolean));
-    const drivers = [...people.values()].sort((a, b) => {
-      const first = raced.has(a.username) ? 0 : 1;
-      const second = raced.has(b.username) ? 0 : 1;
-      if (first !== second) return first - second;
-      return a.name.localeCompare(b.name, LOCALE);
-    });
-    const driver = editing?.driver ?? drivers[0]?.username ?? "";
+    const division = state.division || divisions()[0];
+    const rounds = roundsOf(division);
+    const roundOptions = rounds.map((round) => ({
+      id: round.round,
+      label: `R${round.round}${round.circuit ? ` · ${round.circuit}` : ""}`,
+    }));
+    const driverOptions = state.drivers.map((driver) => ({
+      id: driver.username || driver.name,
+      label: `${driver.name} · ${driver.division}`,
+    }));
+    const types = CORE.PENALTY_TYPES.map((type) => ({ id: type.id, label: type.label }));
 
-    const form = rounds.length ? `<form class="fia-form" id="fia-penalty-form">
+    const list = rounds.flatMap((round) => (round.penalties || []).map((penalty) => `
+      <tr>
+        <td>R${esc(round.round)}</td>
+        <td>${esc(penalty.name || penalty.key || "—")}</td>
+        <td>${esc(CORE.penaltyLabel(penalty))}</td>
+        <td>${esc(penalty.reason || "")}</td>
+        <td class="fia-rowtools"><button type="button" data-action="remove-penalty" data-round="${round.round}" data-id="${esc(penalty.id)}" title="Remove">✕</button></td>
+      </tr>`));
+
+    return `
+      <div class="fia-toolbar-row">${divisionNav()}</div>
+      <form class="fia-form" data-form="penalty">
         <div class="fia-form-grid">
-          <label>Division<select data-penalty="division">${options(divisionNames().map((name) => [name, name]), divisionName)}</select></label>
-          <label>Round<select data-penalty="round">${options(rounds.map((item) => [item.round, `Round ${item.round}${item.circuit ? ` — ${item.circuit}` : ""}`]), roundNumber)}</select></label>
-          <label>Driver<select data-penalty="driver">${options(drivers.map((person) => [person.username, `${person.name} (${person.team})`]), driver, "— none —")}</select></label>
-          <label>Decision<select data-penalty="type">${options(CORE.PENALTY_TYPES.map((item) => [item.id, item.label]), type?.id ?? "points")}</select></label>
-          ${type?.hasValue ? `<label>${esc(type.unit)}<input type="number" min="0" step="1" data-penalty="value" value="${esc(editing?.value ?? "")}" placeholder="0"></label>` : ""}
+          <label>Round<select name="round">${optionList(roundOptions, rounds[0]?.round, "—")}</select></label>
+          <label>Driver<select name="driver">${optionList(driverOptions, "", "— pick a driver —")}</select></label>
+          <label>Decision<select name="type">${optionList(types, "points", "—")}</select></label>
+          <label>Value<input type="number" name="value" min="0" step="1" value="0"></label>
         </div>
-        <label class="fia-wide">Reason<textarea data-penalty="reason" rows="2" placeholder="What the stewards found, in one line.">${esc(editing?.reason ?? "")}</textarea></label>
-        <p class="fia-hint">A <b>points deduction</b> comes off the driver and their constructor's championship total. A <b>disqualification</b> keeps the start but scores nothing for that round. Everything else is published as a note and does not move points.</p>
-        <div class="fia-actions">
-          <button type="submit" class="action action-solid">${editing ? "Save decision" : "Add decision"}</button>
-          ${editing ? '<button type="button" class="action" data-action="cancel-penalty">Cancel</button>' : ""}
-        </div>
-      </form>` : '<p class="empty-line">Record a round first — decisions are attached to one.</p>';
-
-    const list = divisions().map((divisionEntry) => {
-      const rows = decisionsOf(divisionEntry);
-      if (!rows.length) return "";
-      return `<section class="fia-card">
-        <header><h4>${esc(divisionEntry.name)}</h4><p>${rows.length} decision${rows.length === 1 ? "" : "s"}</p></header>
-        <ul class="fia-decisions">
-          ${rows.map(({ round, penalty }) => `
-            <li>
-              <div>
-                <b>${esc(penalty.name || "—")}</b>
-                <span class="fia-tag">${esc(CORE.penaltyLabel(penalty))}</span>
-                <p>${esc(penalty.reason || "No reason given.")}</p>
-                <p class="fia-meta-line">Round ${esc(round)}${penalty.issued_at ? ` · ${esc(stamp(penalty.issued_at))}` : ""}${penalty.issued_by ? ` · ${esc(penalty.issued_by)}` : ""}</p>
-              </div>
-              <div class="fia-actions">
-                <button type="button" class="action" data-action="edit-penalty" data-division="${esc(divisionEntry.name)}" data-round="${esc(round)}" data-id="${esc(penalty.id ?? "")}">Edit</button>
-                <button type="button" class="action" data-action="remove-penalty" data-division="${esc(divisionEntry.name)}" data-round="${esc(round)}" data-id="${esc(penalty.id ?? "")}">Remove</button>
-              </div>
-            </li>`).join("")}
-        </ul>
-      </section>`;
-    }).join("");
-
-    return `<h3>Decisions</h3>${form}
-      <div class="fia-cards">${list || '<p class="empty-line">No decisions published yet.</p>'}</div>`;
+        <label>Reason<input type="text" name="reason" placeholder="Causing a collision at turn 4" spellcheck="false"></label>
+        <div class="fia-actions"><button type="submit" class="action action-solid">Add decision to draft</button></div>
+      </form>
+      <table class="fia-grid">
+        <thead><tr><th>Round</th><th>Driver</th><th>Decision</th><th>Reason</th><th></th></tr></thead>
+        <tbody>${list.join("") || '<tr><td colspan="5" class="fia-note">No decisions recorded in this division.</td></tr>'}</tbody>
+      </table>
+      <p class="fia-hint">Only <b>points deductions</b> and <b>disqualifications</b> move a table. Everything else is published as a decision only.</p>
+    `;
   }
 
-  function clipsView() {
-    const clip = state.clip;
-    const media = clips();
-    const form = `<form class="fia-form" id="fia-clip-form">
-        <div class="fia-form-grid">
-          <label>Title<input type="text" data-clip="title" value="${esc(clip?.title ?? "")}" placeholder="Last-lap pass for the win"></label>
-          <label>Video link<input type="url" data-clip="url" value="${esc(clip?.url ?? "")}" placeholder="https://youtu.be/… or https://clips.twitch.tv/…"></label>
-          <label>Division<select data-clip="division">${options(divisionNames().map((name) => [name, name]), clip?.division ?? "", "All divisions")}</select></label>
-          <label>Round<input type="number" min="1" max="99" data-clip="round" value="${esc(clip?.round ?? "")}" placeholder="optional"></label>
-        </div>
-        <p class="fia-hint" id="fia-clip-kind">${clip?.url ? `${esc(CORE.parseMedia(clip.url).label)} detected.` : "YouTube, Twitch clips, Streamable, Medal and direct video files all play inline; anything else is published as a link."}</p>
-        <div class="fia-actions">
-          <button type="submit" class="action action-solid">${clip ? "Save clip" : "Add clip"}</button>
-          ${clip ? '<button type="button" class="action" data-action="cancel-clip">Cancel</button>' : ""}
-        </div>
-      </form>`;
+  // Standings view ----------------------------------------------------------- //
 
-    const list = media.length ? media.map((item) => {
-      const meta = CORE.parseMedia(item.url);
-      return `<article class="fia-card">
-        <header>
-          <h4>${esc(item.title)}</h4>
-          <p>${esc(meta.label)}${item.division ? ` · ${esc(item.division)}` : " · all divisions"}${item.round ? ` · round ${esc(item.round)}` : ""}</p>
-        </header>
-        <p class="fia-clip-url">${esc(item.url)}</p>
-        ${item.note ? `<p>${esc(item.note)}</p>` : ""}
-        <div class="fia-actions">
-          <button type="button" class="action" data-action="edit-clip" data-id="${esc(item.id)}">Edit</button>
-          <button type="button" class="action" data-action="remove-clip" data-id="${esc(item.id)}">Remove</button>
-        </div>
-      </article>`;
-    }).join("") : '<p class="empty-line">No clips yet — add the first highlight.</p>';
-
-    return `<h3>Clips</h3>${form}<div class="fia-cards">${list}</div>`;
+  function standingsFor(doc) {
+    const out = {};
+    for (const division of doc?.divisions || []) {
+      const name = String(division.name || "").toUpperCase();
+      const computed = CORE.computeStandings(division.rounds || []);
+      out[name] = {
+        drivers: (computed.drivers || []).map((row) => ({
+          ...row,
+          key: String(row.username || row.name || "").toLowerCase(),
+        })),
+        teams: computed.teams || [],
+      };
+    }
+    return out;
   }
 
   function standingsView() {
-    const current = state.standingsDivision ?? divisions()[0]?.name ?? CORE.DIVISION_ORDER[0];
-    state.standingsDivision = current;
-    const division = CORE.divisionEntry(state.doc, current);
-    if (!division) {
-      return `<div class="fia-section-head"><h3>Standings</h3>
-        <button type="button" class="action action-solid" data-action="recompute">Recompute</button></div>
-        <div class="fia-filters">${divisionNav(current, "show-standings")}</div>
-        <p class="empty-line">No ${esc(current)} rounds recorded yet.</p>`;
-    }
+    const before = standingsFor(state.published);
+    return divisions().map((division) => {
+      const after = standingsFor(state.doc)[division] || { drivers: [], teams: [] };
+      const old = before[division] || { drivers: [], teams: [] };
+      const oldRank = new Map(old.drivers.map((row, index) => [row.key, index]));
+      const rows = after.drivers.map((row, index) => {
+        const was = oldRank.get(row.key);
+        const delta = was === undefined ? "new" : was - index;
+        const chip = delta === "new"
+          ? '<span class="fia-chip fia-chip-new">new</span>'
+          : delta === 0 ? "" : `<span class="fia-chip ${delta > 0 ? "fia-chip-up" : "fia-chip-down"}">${delta > 0 ? "▲" : "▼"} ${Math.abs(delta)}</span>`;
+        return `<tr>
+          <td class="fia-pos">${index + 1}</td>
+          <td>${esc(row.name)} ${chip}</td>
+          <td>${esc(row.team || "—")}</td>
+          <td class="fia-num">${row.points}</td>
+          <td class="fia-num">${row.starts}</td>
+          <td class="fia-num">${row.wins}</td>
+          <td class="fia-num">${row.poles}</td>
+          <td class="fia-num">${row.fastest_laps}</td>
+        </tr>`;
+      }).join("");
+      return `
+        <h3 class="fia-round">${esc(division)} — drivers</h3>
+        <table class="fia-grid">
+          <thead><tr><th>P</th><th>Driver</th><th>Team</th><th>Pts</th><th>Starts</th><th>Wins</th><th>Poles</th><th>FL</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="8" class="fia-note">No classified driver yet.</td></tr>'}</tbody>
+        </table>
+        <h3 class="fia-round">${esc(division)} — constructors</h3>
+        <table class="fia-grid">
+          <thead><tr><th>P</th><th>Team</th><th>Pts</th><th>Wins</th><th>Podiums</th></tr></thead>
+          <tbody>${after.teams.map((row, index) => `<tr>
+            <td class="fia-pos">${index + 1}</td><td>${esc(row.name)}</td>
+            <td class="fia-num">${row.points}</td><td class="fia-num">${row.wins}</td><td class="fia-num">${row.podiums}</td>
+          </tr>`).join("") || '<tr><td colspan="5" class="fia-note">No constructor points yet.</td></tr>'}</tbody>
+        </table>`;
+    }).join("");
+  }
 
-    const computed = CORE.computeStandings(division.rounds);
-    const stale = JSON.stringify(computed) !== JSON.stringify(division.standings ?? {});
-    const deducted = new Map();
-    const disqualified = new Set();
-    for (const round of division.rounds ?? []) {
-      for (const penalty of CORE.penaltiesOf(round)) {
-        const key = CORE.keyOf(penalty);
-        if (!key) continue;
-        if (penalty.type === "points") {
-          deducted.set(key, (deducted.get(key) ?? 0) + Math.abs(CORE.num(penalty.value, 0)));
+  // Audit view --------------------------------------------------------------- //
+
+  function auditView() {
+    const entries = (state.doc?.audit || []).slice().reverse();
+    return `
+      <table class="fia-grid">
+        <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody>${entries.map((entry) => `<tr>
+          <td>${esc(stamp(entry.at))}</td>
+          <td>${esc(entry.by || "FIA")}</td>
+          <td>${esc(entry.action)}</td>
+          <td>${esc(entry.detail)}</td>
+        </tr>`).join("") || '<tr><td colspan="4" class="fia-note">Nothing has been changed yet.</td></tr>'}</tbody>
+      </table>`;
+  }
+
+  // Preview ------------------------------------------------------------------ //
+
+  function buildPreview() {
+    const before = state.published;
+    const after = state.doc;
+    const changes = [];
+    for (const division of after.divisions || []) {
+      const name = String(division.name || "").toUpperCase();
+      const oldRounds = (before.divisions || []).find((d) => String(d.name).toUpperCase() === name)?.rounds || [];
+      for (const round of division.rounds || []) {
+        const old = oldRounds.find((r) => Number(r.round) === Number(round.round));
+        const oldText = old ? JSON.stringify({ c: old.classification, p: old.penalties }) : "";
+        const newText = JSON.stringify({ c: round.classification, p: round.penalties });
+        if (oldText !== newText) {
+          changes.push({
+            label: `${name} R${round.round}${round.circuit ? ` · ${round.circuit}` : ""}`,
+            detail: old ? "changed" : "new round",
+          });
         }
-        if (penalty.type === "dsq") disqualified.add(key);
+      }
+      for (const round of oldRounds) {
+        if (!(division.rounds || []).some((r) => Number(r.round) === Number(round.round))) {
+          changes.push({ label: `${name} R${round.round}`, detail: "removed" });
+        }
       }
     }
 
-    const held = division.standings ?? { drivers: [], teams: [] };
-    const drivers = held.drivers ?? [];
-    const teams = held.teams ?? [];
-
-    return `<div class="fia-section-head">
-        <h3>Standings</h3>
-        <button type="button" class="action" data-action="recompute">Recompute</button>
-      </div>
-      <div class="fia-filters">${divisionNav(current, "show-standings")}</div>
-      ${stale ? '<p class="fia-note error">The stored tables are out of date — press Recompute before publishing.</p>' : ""}
-      <div class="table-wrap"><table class="sheet"><thead><tr>
-          <th class="right">Pos</th><th>Driver</th><th>Team</th><th class="right">Pts</th><th class="right">Starts</th><th class="right">Wins</th><th class="right">Podiums</th>
-        </tr></thead><tbody>
-        ${drivers.length ? drivers.map((row) => {
-          const key = CORE.keyOf(row);
-          const tags = [
-            disqualified.has(key) ? "DSQ" : "",
-            deducted.has(key) ? `−${deducted.get(key)} pts` : "",
-          ].filter(Boolean).map((label) => `<span class="fia-tag">${label}</span>`).join("");
-          return `<tr><td class="num">${esc(row.position)}</td>
-            <td><b>${esc(row.name)}</b>${tags ? ` ${tags}` : ""}</td>
-            <td>${esc(row.team ?? "")}</td><td class="num"><b>${esc(row.points ?? 0)}</b></td>
-            <td class="num">${esc(row.starts ?? 0)}</td><td class="num">${esc(row.wins ?? 0)}</td><td class="num">${esc(row.podiums ?? 0)}</td></tr>`;
-        }).join("") : '<tr><td colspan="7" class="empty-line">No rounds recorded yet.</td></tr>'}
-      </tbody></table></div>
-      <div class="table-wrap"><table class="sheet"><thead><tr>
-          <th class="right">Pos</th><th>Constructor</th><th class="right">Pts</th><th class="right">Wins</th><th class="right">Podiums</th>
-        </tr></thead><tbody>
-        ${teams.length ? teams.map((row) => `<tr><td class="num">${esc(row.position)}</td><td><b>${esc(row.name)}</b></td>
-            <td class="num"><b>${esc(row.points ?? 0)}</b></td><td class="num">${esc(row.wins ?? 0)}</td><td class="num">${esc(row.podiums ?? 0)}</td></tr>`).join("")
-          : '<tr><td colspan="5" class="empty-line">No rounds recorded yet.</td></tr>'}
-      </tbody></table></div>`;
+    const beforeTables = standingsFor(before);
+    const afterTables = standingsFor(after);
+    const deltas = [];
+    for (const [division, table] of Object.entries(afterTables)) {
+      const oldRows = new Map((beforeTables[division]?.drivers || []).map((row) => [row.key, row]));
+      for (const row of table.drivers) {
+        const old = oldRows.get(row.key);
+        const diff = row.points - (old?.points ?? 0);
+        if (diff !== 0) deltas.push({ name: row.name, division, diff });
+      }
+      for (const row of beforeTables[division]?.drivers || []) {
+        if (!table.drivers.some((entry) => entry.key === row.key)) {
+          deltas.push({ name: row.name, division, diff: -row.points });
+        }
+      }
+    }
+    return { changes, deltas };
   }
 
-  function squadView() {
-    const officials = state.lineups?.officials ?? [];
-    const seated = officials.reduce((total, entry) => total + (entry.members?.length ?? 0), 0);
-    return `<h3>Squad</h3>
-      <p class="fia-hint">${seated} official${seated === 1 ? "" : "s"} across ${officials.length} role${officials.length === 1 ? "" : "s"}, read from Discord. ${state.lineups?.generated_at ? `Lineups published ${esc(stamp(state.lineups.generated_at))}.` : ""}</p>
-      <div class="officials-grid">${officials.length ? officials.map((entry) => `
-        <article class="official"><h3>${esc(entry.role)}</h3>
-          <div class="people">${(entry.members ?? []).map((person) => `
-            <span class="person" title="${esc(person.name)}"><span class="avatar">${esc(initials(person.name))}</span>${esc(person.name)}</span>`).join("") || '<span class="empty-line">Nobody assigned.</span>'}
-          </div>
-        </article>`).join("") : '<p class="empty-line">No FIA roles are being published right now.</p>'}
+  function previewBlock() {
+    const preview = state.preview;
+    if (!preview) return "";
+    const changes = preview.changes.length
+      ? preview.changes.map((change) => `<li><b>${esc(change.label)}</b> — ${esc(change.detail)}</li>`).join("")
+      : "<li>No round changes.</li>";
+    const deltas = preview.deltas.length
+      ? preview.deltas.map((delta) => `<li>${esc(delta.name)} <span class="${delta.diff > 0 ? "up" : "down"}">${delta.diff > 0 ? "+" : ""}${delta.diff} pts</span> <span class="fia-sub">${esc(delta.division)}</span></li>`).join("")
+      : "<li>No championship totals change.</li>";
+    return `
+      <div class="fia-preview">
+        <h3>Before you publish</h3>
+        <div class="fia-preview-grid">
+          <div><h4>Rounds</h4><ul>${changes}</ul></div>
+          <div><h4>Championship</h4><ul>${deltas}</ul></div>
+        </div>
+        <p class="fia-hint">Publishing commits <code>${RESULTS_PATH}</code> in the site repo. Nothing is written until the bridge accepts it.</p>
       </div>`;
   }
 
-  function activityView() {
-    const entries = [...(state.doc?.audit ?? [])].reverse();
-    return `<div class="fia-section-head">
-        <h3>Activity</h3>
-        <button type="button" class="action" data-action="reload">Reload published</button>
-        <button type="button" class="action" data-action="export">Export JSON</button>
-      </div>
-      <p class="fia-hint">Every edit is recorded locally and published with the results file, so the season carries its own history.</p>
-      ${entries.length ? `<ul class="fia-activity">${entries.map((entry) => `
-        <li><b>${esc(entry.action)}</b> — ${esc(entry.detail)}<br>
-        <span class="fia-meta-line">${esc(stamp(entry.at))} · ${esc(entry.by)}</span></li>`).join("")}</ul>`
-        : '<p class="empty-line">No changes yet in this session.</p>'}`;
-  }
+  // Editing ------------------------------------------------------------------ //
 
-  // Round editing ------------------------------------------------------------ //
-
-  function openRound(division, roundNumber) {
-    const divisionEntry = CORE.divisionEntry(state.doc, division);
-    const round = divisionEntry?.rounds.find((item) => CORE.num(item.round, -1) === CORE.num(roundNumber, -2));
-    if (!round) return;
-    state.edit = {
-      mode: "edit",
-      division: divisionEntry.name,
-      round: round.round,
-      circuit: round.circuit ?? "",
-      pole: round.pole?.username ?? "",
-      fastest: round.fastest_lap?.username ?? "",
-      entries: (round.classification ?? []).map((entry) => ({
-        username: entry.username ?? "",
-        name: entry.name ?? "",
+  function openRound(division, number) {
+    const existing = roundOf(division, number);
+    state.division = division;
+    state.round = Number(number);
+    state.grid = {
+      division,
+      round: Number(number),
+      circuit: existing?.circuit || "",
+      pole: existing?.pole?.username || "",
+      fastest: existing?.fastest_lap?.username || "",
+      entries: (existing?.classification || []).map((entry) => ({
+        name: entry.name,
+        username: entry.username,
         team: entry.short || entry.team || "",
-        status: entry.status === "retired" ? "retired" : "classified",
-        points: CORE.num(entry.points, 0),
+        matched: true,
+        gap: entry.gap || "",
+        dnf: entry.status === "retired" || entry.position === null,
       })),
     };
-    state.confirm = null;
+    state.preview = null;
     render();
   }
 
   function newRound() {
-    const division = state.division ?? divisions()[0]?.name ?? "F1";
-    const existing = CORE.divisionEntry(state.doc, division);
-    const next = (existing?.rounds ?? []).reduce((max, round) => Math.max(max, CORE.num(round.round, 0)), 0) + 1;
-    state.edit = {
-      mode: "new",
-      division,
-      round: next,
-      circuit: "",
-      pole: "",
-      fastest: "",
-      entries: [],
-    };
+    const division = state.division || divisions()[0];
+    const numbers = roundsOf(division).map((round) => Number(round.round) || 0);
+    const next = numbers.length ? Math.max(...numbers) + 1 : 1;
+    state.grid = { division, round: next, circuit: "", pole: "", fastest: "", entries: [] };
+    state.round = next;
+    state.preview = null;
     render();
   }
 
-  function addEntry(username) {
-    const edit = state.edit;
-    if (!username) return;
-    if (edit.entries.some((entry) => entry.username === username)) {
-      return say("That driver is already in the classification.", true);
-    }
-    const person = roster(edit.division).get(username);
-    if (!person) return;
-    edit.entries.push({ username, name: person.name, team: person.team, status: "classified", points: 0 });
-    render();
+  function personFromKey(key) {
+    if (!key) return null;
+    const driver = state.drivers.find((entry) => (entry.username || entry.name) === key);
+    if (!driver) return null;
+    return { name: driver.name, username: driver.username, team: driver.team };
   }
 
-  function moveEntry(index, offset) {
-    const entries = state.edit?.entries;
-    if (!entries) return;
-    const target = index + offset;
-    if (target < 0 || target >= entries.length) return;
-    const [entry] = entries.splice(index, 1);
-    entries.splice(target, 0, entry);
-    render();
-  }
-
-  function saveRound(event) {
-    event.preventDefault();
-    if (!state.edit) return;
-    const edit = {
-      ...state.edit,
-      ...formValues(event.target, "edit", ["division", "round", "circuit", "pole", "fastest"]),
-    };
-    const division = String(edit.division ?? "").toUpperCase();
-    const roundNumber = Number(edit.round);
-    const circuit = String(edit.circuit ?? "").trim();
-
-    if (!division) return say("Pick a division for this round.", true);
-    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 99) {
-      return say("The round must be a whole number from 1 to 99.", true);
+  function gridSave() {
+    const grid = state.grid;
+    if (!grid) return;
+    if (!grid.entries.length) {
+      say("The grid is empty — nothing to save.", true);
+      return;
     }
-    if (!circuit) return say("Add the circuit name.", true);
-    if (!edit.entries.length) return say("Add at least one driver to the classification.", true);
-    if (edit.entries.length > CORE.MAX_CLASSIFIED) {
-      return say(`A result can list at most ${CORE.MAX_CLASSIFIED} drivers.`, true);
-    }
-    const usernames = edit.entries.map((entry) => entry.username);
-    if (new Set(usernames).size !== usernames.length) return say("A driver appears twice.", true);
-    if (!edit.entries.some((entry) => entry.status !== "retired")) {
-      return say("Every driver is retired — at least one has to be classified.", true);
-    }
-    for (const [label, value] of [["pole", edit.pole], ["fastest lap", edit.fastest]]) {
-      if (value && !usernames.includes(value)) {
-        return say(`The ${label} has to be in the classification.`, true);
-      }
-    }
-
-    const table = CORE.pointsTable(CORE.divisionEntry(state.doc, division) ?? {});
+    const entry = divisionEntry(grid.division);
+    const table = CORE.pointsTable(entry);
     let position = 0;
-    const classification = edit.entries.map((entry) => {
-      const retired = entry.status === "retired";
-      if (!retired) position += 1;
+    const classification = grid.entries.map((row) => {
+      if (!row.dnf) position += 1;
       return {
-        position: retired ? null : position,
-        name: entry.name,
-        username: entry.username,
-        team: entry.team,
-        short: entry.team,
-        status: retired ? "retired" : "classified",
-        points: retired ? 0 : CORE.pointsFor(table, position),
+        position: row.dnf ? null : position,
+        name: row.name,
+        username: row.username || "",
+        team: row.team || "",
+        short: row.team || "",
+        status: row.dnf ? "retired" : "classified",
+        points: row.dnf ? 0 : CORE.pointsFor(table, position),
+        gap: row.gap || "",
       };
     });
 
-    const target = CORE.ensureDivision(state.doc, division);
-    const existing = target.rounds.find((item) => CORE.num(item.round, -1) === roundNumber);
-    const personFor = (value) => {
-      if (!value) return null;
-      const entry = classification.find((item) => item.username === value);
-      return entry ? { name: entry.name, username: entry.username, team: entry.short } : null;
-    };
+    // The fastest-lap point is stored on the classification, not derived at
+    // render time, because it only counts for a driver who finished in the
+    // points. This mirrors build_classification() in the bot.
+    if (grid.fastest && FL_POINT) {
+      const scorer = classification.find(
+        (row) => (row.username || row.name) === grid.fastest && row.position !== null && row.points > 0
+      );
+      if (scorer) scorer.points += FL_POINT;
+    }
 
-    const record = {
-      round: roundNumber,
-      circuit,
-      pole: personFor(edit.pole),
-      fastest_lap: personFor(edit.fastest),
-      recorded_at: existing?.recorded_at ?? new Date().toISOString(),
-      recorded_by: existing?.recorded_by ?? author(),
+    const existing = (entry.rounds || []).find((round) => Number(round.round) === Number(grid.round));
+    const round = {
+      round: Number(grid.round),
+      circuit: grid.circuit,
+      pole: personFromKey(grid.pole),
+      fastest_lap: personFromKey(grid.fastest),
+      recorded_at: new Date().toISOString(),
+      recorded_by: state.author || "FIA",
       classification,
-      penalties: existing?.penalties ?? [],
+      penalties: existing?.penalties || [],
     };
-
-    target.rounds = [
-      ...target.rounds.filter((item) => CORE.num(item.round, -1) !== roundNumber),
-      record,
-    ].sort((a, b) => CORE.num(a.round, 0) - CORE.num(b.round, 0));
-
+    entry.rounds = (entry.rounds || []).filter((item) => Number(item.round) !== Number(grid.round));
+    entry.rounds.push(round);
+    entry.rounds.sort((a, b) => Number(a.round) - Number(b.round));
     CORE.refreshStandings(state.doc);
     CORE.audit(state.doc, {
-      action: existing ? "Edit round" : "Add round",
-      detail: `${division} round ${roundNumber}${circuit ? ` — ${circuit}` : ""}`,
-      by: author(),
+      action: existing ? "round replaced" : "round recorded",
+      detail: `${grid.division} R${grid.round} · ${classification.length} classified · by ${state.author || "FIA"}`,
+      by: state.author || "FIA",
     });
-
-    state.edit = null;
-    state.confirm = null;
-    markDirty();
-    say(`${existing ? "Updated" : "Added"} ${division} round ${roundNumber}. Publish to put it live.`, false);
+    state.dirty = true;
+    state.preview = null;
+    state.round = Number(grid.round);
+    buildDrivers();
+    say(`${grid.division} R${grid.round} saved to the draft — publish to make it live.`);
     render();
   }
 
-  function deleteRound(division, roundNumber) {
-    const target = CORE.divisionEntry(state.doc, division);
-    if (!target) return;
-    const before = target.rounds.length;
-    target.rounds = target.rounds.filter((item) => CORE.num(item.round, -1) !== CORE.num(roundNumber, -2));
-    if (target.rounds.length === before) return;
-    CORE.refreshStandings(state.doc);
-    CORE.audit(state.doc, {
-      action: "Delete round",
-      detail: `${division} round ${roundNumber}`,
-      by: author(),
-    });
-    state.confirm = null;
-    markDirty();
-    say(`Removed ${division} round ${roundNumber} and rebuilt the table.`, false);
-    render();
-  }
-
-  // Decisions --------------------------------------------------------------- //
-
-  function penaltyTarget(divisionName, roundNumber, id) {
-    const division = CORE.divisionEntry(state.doc, divisionName);
-    const round = division?.rounds.find((item) => CORE.num(item.round, -1) === CORE.num(roundNumber, -2));
-    if (!round) return null;
-    const index = (round.penalties ?? []).findIndex((item) => String(item.id ?? "") === String(id ?? ""));
-    return { division, round, index };
-  }
-
-  // Form fields are read from the document at submit time as well as being kept
-  // in state, so a field the steward never touched still counts.
-  function formValues(form, attribute, fields) {
-    const values = {};
-    for (const field of fields) {
-      const element = form?.querySelector(`[data-${attribute}="${field}"]`);
-      if (element) values[field] = element.value;
+  function addPenalty(form) {
+    const data = new FormData(form);
+    const division = state.division || divisions()[0];
+    const entry = divisionEntry(division);
+    const number = Number(data.get("round"));
+    const round = (entry.rounds || []).find((item) => Number(item.round) === number);
+    if (!round) {
+      say("That round is not in the draft yet.", true);
+      return;
     }
-    return values;
-  }
-
-  function savePenalty(event) {
-    event.preventDefault();
-    const form = event.target;
-    const draft = {
-      ...(state.penalty ?? {}),
-      ...formValues(form, "penalty", ["division", "round", "driver", "type", "value", "reason"]),
-    };
-    const divisionName = draft.division ?? state.division ?? divisions()[0]?.name;
-    const division = CORE.divisionEntry(state.doc, divisionName);
-    const round = division?.rounds.find((item) => CORE.num(item.round, -1) === CORE.num(draft.round, -2));
-    if (!round) return say("Pick a round with a recorded result.", true);
-
-    const type = CORE.penaltyType(draft.type ?? "points");
-    if (!type) return say("Pick a decision type.", true);
-    const value = type.hasValue ? Math.abs(Number(draft.value) || 0) : 0;
-    if (type.hasValue && !value) return say(`Add a ${type.unit} value for this decision.`, true);
-
-    const people = new Map();
-    for (const entry of round.classification ?? []) {
-      if (entry?.username) people.set(entry.username, entry);
+    const key = String(data.get("driver") || "");
+    const driver = state.drivers.find((item) => (item.username || item.name) === key);
+    if (!driver) {
+      say("Pick a driver first.", true);
+      return;
     }
-    const driverKey = draft.driver ?? "";
-    const driver = people.get(driverKey);
-    if (!driver) return say("Pick the driver this decision is about.", true);
-    if (!String(draft.reason ?? "").trim()) return say("Write a short reason — it is published.", true);
-
-    const record = {
-      id: draft.id ?? `dec-${Date.now().toString(36)}`,
-      type: type.id,
-      value,
+    const type = String(data.get("type") || "points");
+    const value = Math.max(0, Number(data.get("value") || 0));
+    const penalty = {
+      id: slug(`${Date.now()}-${key}-${type}`),
+      key: (driver.username || driver.name).toLowerCase(),
       name: driver.name,
       username: driver.username,
-      team: driver.short || driver.team || "",
-      reason: String(draft.reason).trim(),
-      division: division.name,
-      round: round.round,
-      issued_at: draft.issued_at ?? new Date().toISOString(),
-      issued_by: draft.issued_by ?? author(),
+      team: driver.team,
+      type,
+      value,
+      reason: String(data.get("reason") || ""),
+      by: state.author || "FIA",
+      at: new Date().toISOString(),
     };
-
-    round.penalties = Array.isArray(round.penalties) ? round.penalties : [];
-    if (Number.isInteger(draft.index) && draft.index >= 0) round.penalties[draft.index] = record;
-    else round.penalties.push(record);
-
+    round.penalties = round.penalties || [];
+    round.penalties.push(penalty);
     CORE.refreshStandings(state.doc);
     CORE.audit(state.doc, {
-      action: Number.isInteger(draft.index) ? "Edit decision" : "Add decision",
-      detail: `${division.name} round ${round.round} · ${record.name} · ${CORE.penaltyLabel(record)}`,
-      by: author(),
+      action: "decision",
+      detail: `${division} R${number} · ${driver.name} · ${CORE.penaltyLabel(penalty)}${penalty.reason ? ` — ${penalty.reason}` : ""}`,
+      by: state.author || "FIA",
     });
-
-    state.penalty = null;
-    markDirty();
-    say("Decision saved as a draft. Publish to put it live.", false);
+    state.dirty = true;
+    state.preview = null;
+    say(`Decision added: ${driver.name} — ${CORE.penaltyLabel(penalty)}.`);
     render();
   }
 
-  function removePenalty(divisionName, roundNumber, id) {
-    const found = penaltyTarget(divisionName, roundNumber, id);
-    if (!found || found.index < 0) return;
-    const [removed] = found.round.penalties.splice(found.index, 1);
-    CORE.refreshStandings(state.doc);
-    CORE.audit(state.doc, {
-      action: "Withdraw decision",
-      detail: `${divisionName} round ${roundNumber} · ${removed?.name ?? "driver"} · ${CORE.penaltyLabel(removed)}`,
-      by: author(),
+  // Bridge ------------------------------------------------------------------- //
+
+  async function bridgeCall(path, body) {
+    if (!state.bridgeToken) throw new Error("No bridge token yet — open Publish settings and paste it.");
+    const response = await fetch(`${state.bridge.replace(/\/$/, "")}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${state.bridgeToken}` },
+      body: JSON.stringify(body),
     });
-    markDirty();
-    say("Decision withdrawn and the table rebuilt.", false);
-    render();
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.problem || `Bridge answered HTTP ${response.status}`);
+    return data;
   }
 
-  // Clips ------------------------------------------------------------------- //
-
-  function saveClip(event) {
-    event.preventDefault();
-    const draft = {
-      ...(state.clip ?? {}),
-      ...formValues(event.target, "clip", ["title", "url", "division", "round"]),
-    };
-    const title = String(draft.title ?? "").trim();
-    const url = String(draft.url ?? "").trim();
-    if (!title) return say("Give the clip a title.", true);
-    if (!/^https:\/\/|^http:\/\//i.test(url)) return say("The link needs to start with http:// or https://", true);
-    try {
-      new URL(url);
-    } catch (error) {
-      return say("That link is not a valid URL.", true);
+  function bridgeHint(error) {
+    const offline = /Failed to fetch|NetworkError|Load failed|NetworkError when/i.test(String(error?.message || ""));
+    if (!offline) return error.message;
+    if (location.protocol === "https:") {
+      return `Could not reach ${state.bridge}. Browsers block plain http from an https page — open the desk locally (python -m http.server 8080 in the site folder) or run the bridge on this machine.`;
     }
-
-    const record = {
-      id: draft.id ?? `clip-${Date.now().toString(36)}`,
-      title,
-      url,
-      kind: CORE.parseMedia(url).kind,
-      division: String(draft.division ?? "").toUpperCase(),
-      round: draft.round === "" || draft.round === undefined || draft.round === null
-        ? null : Number(draft.round),
-      note: String(draft.note ?? "").trim(),
-      added_at: draft.added_at ?? new Date().toISOString(),
-      added_by: draft.added_by ?? author(),
-    };
-
-    if (record.round !== null && (!Number.isInteger(record.round) || record.round < 1 || record.round > 99)) {
-      return say("The round has to be a whole number from 1 to 99.", true);
-    }
-
-    if (!Array.isArray(state.doc.media)) state.doc.media = [];
-    const index = state.doc.media.findIndex((item) => item.id === record.id);
-    if (index >= 0) state.doc.media[index] = record;
-    else state.doc.media.push(record);
-
-    CORE.audit(state.doc, {
-      action: index >= 0 ? "Edit clip" : "Add clip",
-      detail: title,
-      by: author(),
-    });
-
-    state.clip = null;
-    markDirty();
-    say("Clip saved as a draft. Publish to put it live.", false);
-    render();
-  }
-
-  function removeClip(id) {
-    const before = state.doc.media?.length ?? 0;
-    state.doc.media = (state.doc.media ?? []).filter((item) => item.id !== id);
-    if ((state.doc.media?.length ?? 0) === before) return;
-    CORE.audit(state.doc, { action: "Remove clip", detail: id, by: author() });
-    markDirty();
-    say("Clip removed from the draft.", false);
-    render();
-  }
-
-  // Publishing -------------------------------------------------------------- //
-
-  async function gh(path, options = {}) {
-    const headers = {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${state.token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...(options.headers ?? {}),
-    };
-    const response = await fetch(`${API}${path}`, { ...options, headers });
-    const body = await response.text();
-    let data = null;
-    try {
-      data = body ? JSON.parse(body) : null;
-    } catch (error) {
-      data = null;
-    }
-    return { status: response.status, ok: response.ok, data, body };
-  }
-
-  function explain(status, data) {
-    const message = String(data?.message ?? "").trim();
-    if (status === 401) return "GitHub rejected the token (401). Paste a fresh fine-grained token.";
-    if (status === 403) return `GitHub refused the write (403).${message ? ` ${message}` : ""} The token needs Contents: read and write.`;
-    if (status === 404) return `GitHub can't see ${state.repo} (404). Check the repository name and that the token can reach it.`;
-    if (status === 409 || status === 422) return "Someone published while you were editing, so the file moved. Reload and reapply before publishing.";
-    return `GitHub answered ${status}${message ? `: ${message}` : ""}.`;
-  }
-
-  async function checkAccess() {
-    if (!state.token) return say("Paste a token first.", true);
-    const note = $("fia-settings-note");
-    note.textContent = "Checking…";
-    note.classList.remove("error");
-    try {
-      const repo = await gh(`/repos/${state.repo}`);
-      if (!repo.ok) {
-        note.textContent = explain(repo.status, repo.data);
-        note.classList.add("error");
-        return;
-      }
-      const push = repo.data?.permissions?.push;
-      const file = await gh(`/repos/${state.repo}/contents/${RESULTS_PATH}?ref=${encodeURIComponent(state.branch)}`);
-      note.textContent = `${repo.data.full_name} · default branch ${repo.data.default_branch} · ${push ? "write access" : "read only"} · ${RESULTS_PATH} ${file.status === 200 ? "exists" : "will be created"}`;
-      note.classList.toggle("error", !push);
-    } catch (error) {
-      note.textContent = `Could not reach GitHub (${error.message}).`;
-      note.classList.add("error");
-    }
+    return `Could not reach ${state.bridge}. Is desk_bridge.py running on the laptop?`;
   }
 
   async function publish() {
     if (state.busy) return;
-    if (!state.token) {
-      $("fia-settings").hidden = false;
-      $("fia-settings-toggle").setAttribute("aria-expanded", "true");
-      $("fia-token").focus();
-      return say("Add a GitHub token in Publish settings before publishing.", true);
-    }
-    if (!state.dirty) return say("Nothing to publish — the repo already has this.", false);
-
     state.busy = true;
     renderChrome();
-    say("Publishing…", false);
-
-    const next = JSON.parse(JSON.stringify(state.doc));
-    const totalDecisions = divisions().reduce((sum, division) => sum + decisionsOf(division).length, 0);
-    // Never publish a table that disagrees with the rounds: a clip or a decision
-    // edit can leave the stored standings behind if this is skipped.
-    CORE.refreshStandings(next);
-    next.updated_at = new Date().toISOString();
-    CORE.audit(next, {
-      action: "Publish",
-      detail: `${allRounds().length} round(s), ${totalDecisions} decision(s), ${clips().length} clip(s)`,
-      by: author(),
-    });
-    const text = serialize(next);
-    const url = `${API}/repos/${state.repo}/contents/${RESULTS_PATH}`;
-
     try {
-      let commit = null;
-      for (let attempt = 0; attempt < 2; attempt += 1) {
-        const existing = await gh(`/repos/${state.repo}/contents/${RESULTS_PATH}?ref=${encodeURIComponent(state.branch)}`);
-        let sha = null;
-        if (existing.status === 200) sha = existing.data?.sha ?? null;
-        else if (existing.status !== 404) {
-          say(explain(existing.status, existing.data), true);
-          return;
-        }
-
-        const body = {
-          message: `FIA desk: ${allRounds().length} round(s), ${totalDecisions} decision(s)`,
-          content: toBase64(text),
-          branch: state.branch,
-        };
-        if (sha) body.sha = sha;
-
-        const result = await gh(`/repos/${state.repo}/contents/${RESULTS_PATH}`, {
-          method: "PUT",
-          body: JSON.stringify(body),
-        });
-
-        if (result.ok) {
-          commit = result.data?.commit?.sha ?? "";
-          break;
-        }
-        const retryable = result.status === 409 || result.status === 422;
-        if (!retryable || attempt === 1) {
-          say(explain(result.status, result.data), true);
-          return;
-        }
-        say("The file moved under us — retrying with the new version…", false);
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
-      state.doc = next;
-      state.publishedText = serialize(next);
+      const document = JSON.parse(JSON.stringify(state.doc));
+      CORE.audit(document, {
+        action: "published",
+        detail: `${(document.divisions || []).reduce((sum, division) => sum + (division.rounds || []).length, 0)} rounds · by ${state.author || "FIA"}`,
+        by: state.author || "FIA",
+      });
+      document.updated_at = new Date().toISOString();
+      say("Publishing through the bridge…");
+      const data = await bridgeCall("/publish", { document, author: state.author || "FIA" });
+      state.published = JSON.parse(JSON.stringify(document));
+      state.doc = JSON.parse(JSON.stringify(document));
       state.dirty = false;
-      commit = commit || "";
-      if (commit) {
-        say(`Published — commit ${commit.slice(0, 7)}. GitHub Pages takes about 40 seconds to rebuild.`, false);
-      } else {
-        say("Published. GitHub Pages takes about 40 seconds to rebuild.", false);
-      }
-      render();
+      state.preview = null;
+      say(data?.message || "Published.");
+      buildDrivers();
     } catch (error) {
-      say(`Publish failed: ${error.message}`, true);
+      say(`Publish failed: ${bridgeHint(error)}`, true);
     } finally {
       state.busy = false;
-      renderChrome();
+      render();
     }
   }
 
-  // Loading + wiring -------------------------------------------------------- //
-
-  function exportJson() {
-    const blob = new Blob([serialize(state.doc)], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "results.json";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-    say("Exported results.json.", false);
-  }
-
-  async function reloadPublished() {
-    if (state.dirty && !window.confirm("Discard your unpublished changes and reload what is live?")) return;
-    state.loaded = false;
-    state.edit = null;
-    state.penalty = null;
-    state.clip = null;
-    state.confirm = null;
+  async function checkBridge() {
+    const note = $("fia-settings-note");
     try {
-      await load(true);
-      render();
-      say("Reloaded the published results.", false);
+      const response = await fetch(`${state.bridge.replace(/\/$/, "")}/health`, { cache: "no-store" });
+      const data = await response.json().catch(() => null);
+      note.textContent = response.ok
+        ? `Bridge is up (${data?.name || "desk"}).`
+        : `Bridge answered HTTP ${response.status}.`;
     } catch (error) {
-      say(`Could not reload: ${error.message}`, true);
+      note.textContent = bridgeHint(error);
     }
   }
 
-  function onClick(event) {
-    const button = event.target.closest("[data-action]");
-    if (!button) return;
-    const action = button.dataset.action;
-    const index = Number(button.dataset.index);
+  // Gate --------------------------------------------------------------------- //
 
-    if (action === "new-round") newRound();
-    else if (action === "edit-round") openRound(button.dataset.division, button.dataset.round);
-    else if (action === "delete-round") {
-      state.confirm = `${button.dataset.division}:${button.dataset.round}`;
-      render();
-    } else if (action === "confirm-delete") deleteRound(button.dataset.division, button.dataset.round);
-    else if (action === "cancel-delete") {
-      state.confirm = null;
-      render();
-    } else if (action === "show-division") {
-      state.division = button.dataset.division;
-      render();
-    } else if (action === "show-standings") {
-      state.standingsDivision = button.dataset.division;
-      render();
-    } else if (action === "cancel-edit") {
-      state.edit = null;
-      render();
-    } else if (action === "entry-up") moveEntry(index, -1);
-    else if (action === "entry-down") moveEntry(index, 1);
-    else if (action === "entry-remove") {
-      state.edit?.entries.splice(index, 1);
-      render();
-    } else if (action === "entry-add") addEntry($("fia-add-driver")?.value ?? "");
-    else if (action === "edit-penalty") {
-      const found = penaltyTarget(button.dataset.division, button.dataset.round, button.dataset.id);
-      if (!found || found.index < 0) return;
-      const penalty = found.round.penalties[found.index];
-      state.penalty = {
-        ...penalty,
-        division: button.dataset.division,
-        round: found.round.round,
-        index: found.index,
-      };
-      render();
-    } else if (action === "cancel-penalty") {
-      state.penalty = null;
-      render();
-    } else if (action === "remove-penalty") {
-      removePenalty(button.dataset.division, button.dataset.round, button.dataset.id);
-    } else if (action === "edit-clip") {
-      const item = (state.doc.media ?? []).find((clip) => clip.id === button.dataset.id);
-      if (!item) return;
-      state.clip = { ...item };
-      render();
-    } else if (action === "cancel-clip") {
-      state.clip = null;
-      render();
-    } else if (action === "remove-clip") removeClip(button.dataset.id);
-    else if (action === "recompute") {
-      CORE.refreshStandings(state.doc);
-      CORE.audit(state.doc, { action: "Recompute", detail: "Rebuilt every championship table", by: author() });
-      markDirty();
-      say("Tables rebuilt from the recorded rounds.", false);
-      render();
-    } else if (action === "export") exportJson();
-    else if (action === "reload") reloadPublished();
-  }
-
-  function onChange(event) {
-    const select = event.target;
-
-    if (select.matches("[data-entry-driver]")) {
-      const index = Number(select.dataset.index);
-      const person = roster(state.edit.division).get(select.value);
-      const entry = state.edit.entries[index];
-      if (!entry) return;
-      entry.username = select.value;
-      entry.name = person?.name ?? entry.name;
-      entry.team = person?.team ?? entry.team;
-      render();
-    } else if (select.matches("[data-entry-status]")) {
-      const entry = state.edit.entries[Number(select.dataset.index)];
-      if (!entry) return;
-      entry.status = select.value;
-      render();
-    } else if (select.matches("[data-edit]")) {
-      const field = select.dataset.edit;
-      state.edit[field] = select.value;
-      if (field === "division") render();
-    } else if (select.matches("[data-penalty]")) {
-      const field = select.dataset.penalty;
-      state.penalty = state.penalty ?? {};
-      state.penalty[field] = select.value;
-      if (["division", "round", "type"].includes(field)) {
-        if (field !== "type") delete state.penalty.driver;
-        render();
-      }
-    } else if (select.matches("[data-clip]")) {
-      state.clip = state.clip ?? {};
-      state.clip[select.dataset.clip] = select.value;
-    }
-  }
-
-  function onInput(event) {
-    const field = event.target;
-    if (field.matches("[data-edit]")) {
-      state.edit[field.dataset.edit] = field.value;
-    } else if (field.matches("[data-penalty]")) {
-      state.penalty = state.penalty ?? {};
-      state.penalty[field.dataset.penalty] = field.value;
-    } else if (field.matches("[data-clip]")) {
-      state.clip = state.clip ?? {};
-      state.clip[field.dataset.clip] = field.value;
-      if (field.dataset.clip === "url") {
-        const hint = $("fia-clip-kind");
-        if (hint) hint.textContent = field.value ? `${CORE.parseMedia(field.value).label} detected.` : "Paste a video link.";
-      }
-    }
-  }
-
-  function onSubmit(event) {
-    if (event.target.id === "fia-round-form") saveRound(event);
-    else if (event.target.id === "fia-penalty-form") savePenalty(event);
-    else if (event.target.id === "fia-clip-form") saveClip(event);
-  }
-
-  // Gate -------------------------------------------------------------------- //
-
-  function isOpen() {
-    return location.hash.toLowerCase() === HASH;
-  }
-
-  function showBody(unlocked) {
-    $("fia-gate").hidden = unlocked;
-    $("fia-body").hidden = !unlocked;
-    if (unlocked) {
-      load()
-        .then(() => render())
-        .catch((error) => say(`Could not read the published data (${error.message}).`, true));
-    } else {
-      $("fia-password").focus();
-    }
-  }
-
-  function setMode(on) {
-    document.body.dataset.fia = on ? "on" : "";
-    section.hidden = !on;
-    document.title = on ? "FIA — race control" : publicTitle;
-    if (on) {
-      window.scrollTo({ top: 0 });
-      const unlocked = sessionStorage.getItem(UNLOCK_KEY) === "1";
-      if (unlocked) {
-        $("fia-repo").value = state.repo;
-        $("fia-branch").value = state.branch;
-        $("fia-author").value = state.author;
-        $("fia-token").value = state.token;
-      }
-      showBody(unlocked);
-    } else {
-      // The unlock lives for the tab, not for the hash: leaving the desk hides
-      // it, and coming back does not ask again. Only Lock forgets the session.
-      $("fia-password").value = "";
-      $("fia-gate-note").textContent = "";
-      $("fia-gate-note").classList.remove("error");
-    }
-  }
-
-  $("fia-gate").addEventListener("submit", async (event) => {
+  async function checkAccess(event) {
     event.preventDefault();
+    const input = $("fia-password");
     const note = $("fia-gate-note");
-    const entered = $("fia-password").value;
-    if ((await digest(entered)) !== CODE_SHA256) {
-      note.textContent = "That code is not recognised.";
-      note.classList.add("error");
-      $("fia-password").select();
+    const value = String(input.value || "");
+    if (!value) return;
+    const hashed = await digest(value);
+    if (hashed === CODE_SHA256) {
+      sessionStorage.setItem(UNLOCK_KEY, "1");
+      note.textContent = "";
+      note.classList.remove("error");
+      setMode(true);
+      await load();
       return;
     }
-    note.textContent = "";
-    note.classList.remove("error");
-    sessionStorage.setItem(UNLOCK_KEY, "1");
-    $("fia-password").value = "";
-    $("fia-repo").value = state.repo;
-    $("fia-branch").value = state.branch;
-    $("fia-author").value = state.author;
-    $("fia-token").value = state.token;
-    showBody(true);
-  });
+    note.textContent = "That code is not right.";
+    note.classList.add("error");
+    input.value = "";
+  }
 
-  $("fia-lock").addEventListener("click", () => {
-    sessionStorage.removeItem(UNLOCK_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-    state.token = "";
-    state.edit = null;
-    state.penalty = null;
-    state.clip = null;
-    state.confirm = null;
-    if (state.doc) {
-      state.doc = null;
-      state.loaded = false;
+  function setMode(unlocked) {
+    $("fia-body").hidden = !unlocked;
+    $("fia-gate").hidden = unlocked;
+    section.classList.toggle("is-unlocked", unlocked);
+    document.title = unlocked ? `FIA · ${publicTitle}` : publicTitle;
+    if (!unlocked) sessionStorage.removeItem(UNLOCK_KEY);
+  }
+
+  function isOpen() {
+    return sessionStorage.getItem(UNLOCK_KEY) === "1";
+  }
+
+  // Events ------------------------------------------------------------------- //
+
+  section.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    const lock = event.target.closest("#fia-lock");
+    if (lock) {
+      setMode(false);
+      return;
     }
-    $("fia-token").value = "";
-    $("fia-body").hidden = true;
-    $("fia-gate").hidden = false;
-    $("fia-password").value = "";
-    $("fia-status").textContent = "";
-    $("fia-gate-note").textContent = "Locked — the token was forgotten.";
-    $("fia-gate-note").classList.remove("error");
-    $("fia-password").focus();
-  });
-
-  $("fia-nav").addEventListener("click", (event) => {
-    const button = event.target.closest("[data-view]");
     if (!button) return;
-    state.view = button.dataset.view;
-    state.edit = null;
-    state.penalty = null;
-    state.clip = null;
-    state.confirm = null;
-    render();
-  });
+    const action = button.dataset.action;
 
-  $("fia-view").addEventListener("click", onClick);
-  $("fia-view").addEventListener("change", onChange);
-  $("fia-view").addEventListener("input", onInput);
-  $("fia-view").addEventListener("submit", onSubmit);
-
-  $("fia-publish").addEventListener("click", publish);
-  $("fia-discard").addEventListener("click", async () => {
-    if (!state.dirty) return;
-    if (!window.confirm("Discard every unpublished change?")) return;
-    state.doc = CORE.normalizeDocument(JSON.parse(state.publishedText));
-    state.dirty = false;
-    state.edit = null;
-    state.penalty = null;
-    state.clip = null;
-    state.confirm = null;
-    say("Draft discarded.", false);
-    render();
-  });
-
-  $("fia-settings-toggle").addEventListener("click", () => {
-    const panel = $("fia-settings");
-    panel.hidden = !panel.hidden;
-    $("fia-settings-toggle").setAttribute("aria-expanded", String(!panel.hidden));
-    if (!panel.hidden) {
-      $("fia-repo").value = state.repo;
-      $("fia-branch").value = state.branch;
-      $("fia-author").value = state.author;
-      $("fia-token").value = state.token;
+    if (action === "division") {
+      state.division = button.dataset.division;
+      state.grid = null;
+      state.round = null;
+      state.preview = null;
+      render();
+      return;
+    }
+    if (action === "open-round") {
+      openRound(state.division, button.dataset.round);
+      return;
+    }
+    if (action === "new-round") {
+      newRound();
+      return;
+    }
+    if (action === "parse-grid") {
+      const rows = parseGrid(state.gridPaste);
+      if (!rows.length) {
+        say("Nothing parsed — paste one driver per line.", true);
+        return;
+      }
+      state.grid.entries = rows;
+      const unknown = rows.filter((row) => !row.matched).map((row) => row.name);
+      say(unknown.length
+        ? `${rows.length} parsed. Not in the lineups: ${unknown.join(", ")} — kept as typed.`
+        : `${rows.length} drivers parsed.`);
+      render();
+      return;
+    }
+    if (action === "add-entry") {
+      state.grid.entries.push({ name: "", username: "", team: "", matched: true, gap: "", dnf: false });
+      render();
+      return;
+    }
+    if (action === "move") {
+      const index = Number(button.dataset.index);
+      const offset = Number(button.dataset.direction);
+      const list = state.grid.entries;
+      const next = index + offset;
+      if (next < 0 || next >= list.length) return;
+      const moved = list[index];
+      list[index] = list[next];
+      list[next] = moved;
+      render();
+      return;
+    }
+    if (action === "remove-entry") {
+      state.grid.entries.splice(Number(button.dataset.index), 1);
+      render();
+      return;
+    }
+    if (action === "save-grid") {
+      gridSave();
+      return;
+    }
+    if (action === "discard-grid") {
+      state.grid = null;
+      state.round = null;
+      render();
+      return;
+    }
+    if (action === "delete-round") {
+      const entry = divisionEntry(state.grid.division);
+      const removed = Number(state.grid.round);
+      entry.rounds = (entry.rounds || []).filter((round) => Number(round.round) !== removed);
+      CORE.refreshStandings(state.doc);
+      CORE.audit(state.doc, {
+        action: "round removed",
+        detail: `${state.grid.division} R${removed}`,
+        by: state.author || "FIA",
+      });
+      state.dirty = true;
+      state.grid = null;
+      state.round = null;
+      state.preview = null;
+      say("Round removed from the draft.");
+      render();
+      return;
+    }
+    if (action === "remove-penalty") {
+      const division = state.division || divisions()[0];
+      const entry = divisionEntry(division);
+      const round = (entry.rounds || []).find((item) => Number(item.round) === Number(button.dataset.round));
+      if (!round) return;
+      round.penalties = (round.penalties || []).filter((penalty) => penalty.id !== button.dataset.id);
+      CORE.refreshStandings(state.doc);
+      CORE.audit(state.doc, {
+        action: "decision removed",
+        detail: `${division} R${button.dataset.round}`,
+        by: state.author || "FIA",
+      });
+      state.dirty = true;
+      say("Decision removed from the draft.");
+      render();
+      return;
+    }
+    if (action === "preview") {
+      state.preview = buildPreview();
+      render();
+      return;
+    }
+    if (action === "publish") {
+      publish();
+      return;
+    }
+    if (action === "discard") {
+      state.doc = JSON.parse(JSON.stringify(state.published));
+      state.dirty = false;
+      state.grid = null;
+      state.preview = null;
+      buildDrivers();
+      say("Draft discarded.");
+      render();
+      return;
+    }
+    if (action === "check-bridge") {
+      checkBridge();
+      return;
+    }
+    if (action === "forget") {
+      sessionStorage.removeItem(BRIDGE_TOKEN_KEY);
+      state.bridgeToken = "";
+      $("fia-bridge-token").value = "";
+      $("fia-settings-note").textContent = "Bridge token forgotten.";
+      return;
+    }
+    if (action === "settings") {
+      const panel = $("fia-settings");
+      panel.hidden = !panel.hidden;
+      button.setAttribute("aria-expanded", String(!panel.hidden));
+      return;
+    }
+    if (action === "view") {
+      state.view = button.dataset.view;
+      state.preview = null;
+      render();
     }
   });
 
-  $("fia-repo").addEventListener("input", (event) => {
-    state.repo = event.target.value.trim() || DEFAULT_REPO;
-    localStorage.setItem("ams-fia-repo", state.repo);
-  });
-  $("fia-branch").addEventListener("input", (event) => {
-    state.branch = event.target.value.trim() || DEFAULT_BRANCH;
-    localStorage.setItem("ams-fia-branch", state.branch);
-  });
-  $("fia-author").addEventListener("input", (event) => {
-    state.author = event.target.value.trim();
-    localStorage.setItem("ams-fia-author", state.author);
-  });
-  $("fia-token").addEventListener("input", (event) => {
-    state.token = event.target.value.trim();
-    if (state.token) sessionStorage.setItem(TOKEN_KEY, state.token);
-    else sessionStorage.removeItem(TOKEN_KEY);
+  section.addEventListener("change", (event) => {
+    const target = event.target;
+    const action = target.dataset.action;
+    if (!action || !state.grid) return;
+    if (action === "driver") {
+      const index = Number(target.dataset.index);
+      const driver = state.drivers.find((entry) => (entry.username || entry.name) === target.value);
+      state.grid.entries[index] = {
+        ...state.grid.entries[index],
+        name: driver ? driver.name : "",
+        username: driver ? driver.username : "",
+        team: driver ? driver.team : "",
+        matched: !!driver,
+      };
+      render();
+      return;
+    }
+    if (action === "dnf") {
+      state.grid.entries[Number(target.dataset.index)].dnf = target.checked;
+      render();
+      return;
+    }
+    if (action === "pole") {
+      state.grid.pole = target.value;
+      return;
+    }
+    if (action === "fastest") {
+      state.grid.fastest = target.value;
+      return;
+    }
+    if (action === "round-number") {
+      state.grid.round = Math.max(1, Number(target.value || 1));
+      return;
+    }
+    if (action === "circuit") {
+      state.grid.circuit = target.value;
+    }
   });
 
-  $("fia-check").addEventListener("click", checkAccess);
-  $("fia-forget").addEventListener("click", () => {
-    state.token = "";
-    sessionStorage.removeItem(TOKEN_KEY);
-    $("fia-token").value = "";
-    $("fia-settings-note").textContent = "Token forgotten. Paste a new one to publish again.";
+  section.addEventListener("input", (event) => {
+    const target = event.target;
+    const action = target.dataset.action;
+    if (!action) return;
+    if (action === "gap" && state.grid) {
+      state.grid.entries[Number(target.dataset.index)].gap = target.value;
+      return;
+    }
+    if (action === "paste") {
+      state.gridPaste = target.value;
+      return;
+    }
+    if (action === "search") {
+      state.search = target.value;
+      render();
+      const next = $("fia-view").querySelector('[data-action="search"]');
+      if (next) {
+        next.focus();
+        next.setSelectionRange(next.value.length, next.value.length);
+      }
+      return;
+    }
+    if (action === "circuit" && state.grid) state.grid.circuit = target.value;
   });
 
-  window.addEventListener("beforeunload", (event) => {
-    if (!state.dirty) return;
-    event.preventDefault();
-    event.returnValue = "";
+  section.addEventListener("submit", (event) => {
+    const form = event.target;
+    if (form.id === "fia-gate") {
+      checkAccess(event);
+      return;
+    }
+    if (form.dataset.form === "penalty") {
+      event.preventDefault();
+      addPenalty(form);
+    }
   });
 
-  window.addEventListener("hashchange", () => setMode(isOpen()));
-  // A reload can apply the fragment after this script runs, so re-check once the
-  // document has finished loading as well.
-  window.addEventListener("load", () => setMode(isOpen()));
-  setMode(isOpen());
+  // Boot --------------------------------------------------------------------- //
+
+  const bridgeInput = $("fia-bridge");
+  const tokenInput = $("fia-bridge-token");
+  const authorInput = $("fia-author");
+  if (bridgeInput) bridgeInput.value = state.bridge;
+  if (tokenInput) tokenInput.value = state.bridgeToken;
+  if (authorInput) authorInput.value = state.author;
+
+  for (const input of [bridgeInput, tokenInput, authorInput]) {
+    if (!input) continue;
+    input.addEventListener("input", () => {
+      if (input === bridgeInput) {
+        state.bridge = input.value.trim() || DEFAULT_BRIDGE;
+        sessionStorage.setItem(BRIDGE_KEY, state.bridge);
+      } else if (input === tokenInput) {
+        state.bridgeToken = input.value.trim();
+        sessionStorage.setItem(BRIDGE_TOKEN_KEY, state.bridgeToken);
+      } else {
+        state.author = input.value.trim();
+        localStorage.setItem(AUTHOR_KEY, state.author);
+      }
+    });
+  }
+
+  function syncFromHash() {
+    const on = location.hash.toLowerCase() === HASH;
+    section.hidden = !on;
+    if (!on) return;
+    if (isOpen()) {
+      setMode(true);
+      if (!state.loaded) load();
+    } else {
+      setMode(false);
+    }
+  }
+
+  window.addEventListener("hashchange", syncFromHash);
+  if (location.hash.toLowerCase() === HASH) syncFromHash();
 })();
