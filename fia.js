@@ -892,8 +892,10 @@
     try {
       const response = await fetch(`${state.bridge.replace(/\/$/, "")}/health`, { cache: "no-store" });
       const data = await response.json().catch(() => null);
+      // The bridge's /health is public through the tunnel, so it must not
+      // expose the machine name — and neither should this line.
       note.textContent = response.ok
-        ? `Bridge is up (${data?.name || "desk"}).`
+        ? "Bridge is up — publishing is ready."
         : `Bridge answered HTTP ${response.status}.`;
     } catch (error) {
       note.textContent = bridgeHint(error);
