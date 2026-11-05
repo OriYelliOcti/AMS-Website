@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-02T16:18:22+00:00",
+ "generated_at": "2026-11-05T17:34:52+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
-  "teams": 41,
-  "rostered": 49,
+  "teams": 42,
+  "rostered": 50,
   "officials": 5
  },
  "divisions": [
@@ -277,6 +277,24 @@
         {
          "name": "the | FER | 🇳🇿 | 👑",
          "username": "user132222",
+         "bot": false
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "name": "[F1] Tarigy Motorsports Team",
+     "short": "Tarigy Motorsports Team",
+     "color": "#9b59b6",
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "Lauuu",
+         "username": "lauuuson",
          "bot": false
         }
        ]
