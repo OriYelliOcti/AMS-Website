@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:29:06+00:00",
+ "generated_at": "2026-11-09T20:31:33+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 38,
+  "rostered": 37,
   "officials": 5
  },
  "divisions": [
@@ -114,7 +114,7 @@
      "name": "[F1] McLaren Mastercard",
      "short": "McLaren Mastercard",
      "color": "#e67e22",
-     "member_count": 6,
+     "member_count": 5,
      "slots": [
       {
        "slot": "Driver",
@@ -134,11 +134,6 @@
       {
        "slot": "Reserve",
        "members": [
-        {
-         "name": "Bence",
-         "username": "bence08478",
-         "bot": false
-        },
         {
          "name": "SCKIBLES",
          "username": "sckibles",
