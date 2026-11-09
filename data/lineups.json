@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:16:50+00:00",
+ "generated_at": "2026-11-09T20:17:57+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 47,
+  "rostered": 45,
   "officials": 5
  },
  "divisions": [
@@ -239,7 +239,7 @@
      "name": "[F1] Scuderia Ferrari // HP",
      "short": "Scuderia Ferrari // HP",
      "color": "#e12323",
-     "member_count": 3,
+     "member_count": 2,
      "slots": [
       {
        "slot": "Driver",
@@ -257,11 +257,6 @@
         {
          "name": "Knownn | FER/EZE | 🇦🇺 | 👑",
          "username": "twistiee12",
-         "bot": false
-        },
-        {
-         "name": "the | FER | 🇳🇿 | 👑",
-         "username": "user132222",
          "bot": false
         }
        ]
@@ -431,18 +426,8 @@
      "name": "[F2] Haribo Monster Motorsports",
      "short": "Haribo Monster Motorsports",
      "color": "#91f116",
-     "member_count": 2,
+     "member_count": 1,
      "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "Ironhxde | HAR | 🇵🇭 | #84",
-         "username": "iron_roblox",
-         "bot": false
-        }
-       ]
-      },
       {
        "slot": "Team Boss",
        "members": [
