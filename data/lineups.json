@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:31:33+00:00",
+ "generated_at": "2026-11-09T20:32:15+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 37,
+  "rostered": 36,
   "officials": 5
  },
  "divisions": [
@@ -812,19 +812,8 @@
      "name": "[GT3] Porsche 911 GT3",
      "short": "Porsche 911 GT3",
      "color": "#a84300",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Team Boss",
-       "members": [
-        {
-         "name": "Cash | POR | 🇺🇸 | 👑",
-         "username": "mitchellpixel",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     }
    ]
   }
