@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:32:15+00:00",
+ "generated_at": "2026-11-09T20:33:56+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 36,
+  "rostered": 35,
   "officials": 5
  },
  "divisions": [
@@ -167,7 +167,7 @@
      "name": "[F1] Mercedes AMG // PETRONAS",
      "short": "Mercedes AMG // PETRONAS",
      "color": "#1abc9c",
-     "member_count": 4,
+     "member_count": 3,
      "slots": [
       {
        "slot": "Driver",
@@ -175,16 +175,6 @@
         {
          "name": "Bread | MER | 🇮🇩 | F1 | #29",
          "username": "not_sergioperez101",
-         "bot": false
-        }
-       ]
-      },
-      {
-       "slot": "Team Principal",
-       "members": [
-        {
-         "name": "Godzilla | MER | 🇪🇬 | F1 | 👔",
-         "username": "godzilla_zain",
          "bot": false
         }
        ]
