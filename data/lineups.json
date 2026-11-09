@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:36:05+00:00",
+ "generated_at": "2026-11-09T20:36:32+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 31,
+  "rostered": 30,
   "officials": 5
  },
  "divisions": [
@@ -632,19 +632,8 @@
      "name": "[GT3] Bayerische Motoren Werke M4",
      "short": "Bayerische Motoren Werke M4",
      "color": "#206694",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "Recon | BMW | 🇵🇭 | #6",
-         "username": "reconkeyofficia1",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     },
     {
      "name": "[GT3] Chevrolet Corvette Z06 GT3.R",
