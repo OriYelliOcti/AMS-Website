@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:28:04+00:00",
+ "generated_at": "2026-11-09T20:29:06+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
@@ -901,26 +901,21 @@
    ]
   },
   {
-   "role": "[🧑‍💻] FIA Assistants",
-   "members": [
-    {
-     "name": "Dream | FIA | 🇦🇺 | SEC",
-     "username": "dreamneedsadog",
-     "bot": false
-    },
-    {
-     "name": "Night Alloy | FIA | 🇬🇧 | SEC",
-     "username": "night_alloy",
-     "bot": false
-    }
-   ]
-  },
-  {
    "role": "[🧑‍✈️] FIA President",
    "members": [
     {
      "name": "Neon | FIA Pres | 🇨🇦 | F1 D",
      "username": "neon32133",
+     "bot": false
+    }
+   ]
+  },
+  {
+   "role": "[🧑‍💻] FIA Assistants",
+   "members": [
+    {
+     "name": "Dream | FIA | 🇦🇺 | SEC",
+     "username": "dreamneedsadog",
      "bot": false
     }
    ]
