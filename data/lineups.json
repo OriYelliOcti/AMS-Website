@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:22:52+00:00",
+ "generated_at": "2026-11-09T20:24:28+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 43,
+  "rostered": 42,
   "officials": 5
  },
  "divisions": [
@@ -503,16 +503,11 @@
      "name": "[F2] Motul Falcon Motorsports F2 Team",
      "short": "Motul Falcon Motorsports F2 Team",
      "color": "#e67e22",
-     "member_count": 2,
+     "member_count": 1,
      "slots": [
       {
        "slot": "Driver",
        "members": [
-        {
-         "name": "Crabee | FAL | 🇵🇰 | #91",
-         "username": "crabeecattyalt",
-         "bot": false
-        },
         {
          "name": "Tymmy | FAL | 🇦🇺 | #81",
          "username": "norri_886",
