@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:37:22+00:00",
+ "generated_at": "2026-11-09T20:38:02+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 26,
+  "rostered": 25,
   "officials": 5
  },
  "divisions": [
@@ -342,19 +342,8 @@
      "name": "[F2] AWS Hex Racing F2 Team",
      "short": "AWS Hex Racing F2 Team",
      "color": "#ffffff",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "Tob~Vista~Lolo",
-         "username": "vistalolo_89343",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     },
     {
      "name": "[F2] Haribo Monster Motorsports",
