@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-09T20:38:02+00:00",
+ "generated_at": "2026-11-09T21:22:04+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 25,
+  "rostered": 26,
   "officials": 5
  },
  "divisions": [
@@ -237,8 +237,19 @@
      "name": "[F1] Tarigy Motorsports Team",
      "short": "Tarigy Motorsports Team",
      "color": "#9b59b6",
-     "member_count": 0,
-     "slots": []
+     "member_count": 1,
+     "slots": [
+      {
+       "slot": "Other",
+       "members": [
+        {
+         "name": "⃟",
+         "username": "lauuuson",
+         "bot": false
+        }
+       ]
+      }
+     ]
     },
     {
      "name": "[F1] TGR Haas Formula 1 Team",
