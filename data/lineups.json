@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-11T13:29:27+00:00",
+ "generated_at": "2026-11-11T19:08:54+00:00",
  "guild": {
   "name": "✧ [𝗔𝗠𝗦] 𝗔𝗽𝗲𝘅 𝗠𝗼𝘁𝗼𝗿𝘀𝗽𝗼𝗿𝘁 𝗦𝗲𝗿𝗶𝗲𝘀 F1/F2/F3 ✧"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 26,
+  "rostered": 25,
   "officials": 5
  },
  "divisions": [
@@ -278,7 +278,7 @@
      "name": "[F1] Tuhago Mobil 1 Formula 1 Team",
      "short": "Tuhago Mobil 1 Formula 1 Team",
      "color": "#0f0e5b",
-     "member_count": 2,
+     "member_count": 1,
      "slots": [
       {
        "slot": "Driver",
@@ -286,16 +286,6 @@
         {
          "name": "anti | #3 | TUH",
          "username": "antixnf",
-         "bot": false
-        }
-       ]
-      },
-      {
-       "slot": "Team Boss",
-       "members": [
-        {
-         "name": "Elyesaq4",
-         "username": "leiwshashb44",
          "bot": false
         }
        ]
