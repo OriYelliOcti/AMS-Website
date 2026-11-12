@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "season": "Season 1",
- "updated_at": "2026-11-12T17:31:30.112Z",
+ "updated_at": "2026-11-12T17:32:31.357Z",
  "divisions": [
   {
    "name": "F1",
@@ -113,7 +113,7 @@
       "username": "ww_gaming",
       "team": "McLaren Mastercard"
      },
-     "recorded_at": "2026-11-12T17:31:30.109Z",
+     "recorded_at": "2026-11-12T17:32:31.353Z",
      "recorded_by": "Octi",
      "classification": [
       {
@@ -125,6 +125,146 @@
        "status": "classified",
        "points": 26,
        "gap": "LEADER"
+      },
+      {
+       "position": 2,
+       "name": "anti | #3 | TUH",
+       "username": "antixnf",
+       "team": "Tuhago Mobil 1 Formula 1 Team",
+       "short": "Tuhago Mobil 1 Formula 1 Team",
+       "status": "classified",
+       "points": 18,
+       "gap": ""
+      },
+      {
+       "position": 3,
+       "name": "ASTO | Jamie",
+       "username": "gallon_allen",
+       "team": "Aston Martin Aramco",
+       "short": "Aston Martin Aramco",
+       "status": "classified",
+       "points": 15,
+       "gap": ""
+      },
+      {
+       "position": 4,
+       "name": "Batwert",
+       "username": "",
+       "team": "",
+       "short": "",
+       "status": "classified",
+       "points": 12,
+       "gap": ""
+      },
+      {
+       "position": 5,
+       "name": "Bread | MER | 🇮🇩 | F1 | #29",
+       "username": "not_sergioperez101",
+       "team": "Mercedes AMG // PETRONAS",
+       "short": "Mercedes AMG // PETRONAS",
+       "status": "classified",
+       "points": 10,
+       "gap": ""
+      },
+      {
+       "position": 6,
+       "name": "Crocs | AMR | 🇮🇨 | #26",
+       "username": "thatblueangelfan",
+       "team": "Aston Martin Aramco",
+       "short": "Aston Martin Aramco",
+       "status": "classified",
+       "points": 8,
+       "gap": ""
+      },
+      {
+       "position": 7,
+       "name": "drsferra7",
+       "username": "drsferra7",
+       "team": "Scuderia Ferrari // HP",
+       "short": "Scuderia Ferrari // HP",
+       "status": "classified",
+       "points": 6,
+       "gap": ""
+      },
+      {
+       "position": 8,
+       "name": "Jeffz | TGR | 99",
+       "username": "jhjeffz",
+       "team": "TGR Haas Formula 1 Team",
+       "short": "TGR Haas Formula 1 Team",
+       "status": "classified",
+       "points": 4,
+       "gap": ""
+      },
+      {
+       "position": 9,
+       "name": "JSDF_TRIGGER",
+       "username": "tirgger1",
+       "team": "HONDA · VOLTEX/TOP FUEL RACING",
+       "short": "HONDA · VOLTEX/TOP FUEL RACING",
+       "status": "classified",
+       "points": 2,
+       "gap": ""
+      },
+      {
+       "position": 10,
+       "name": "Mirinda | MCL | 🇧🇭 | #32",
+       "username": "mirindadrinkitup",
+       "team": "McLaren Mastercard",
+       "short": "McLaren Mastercard",
+       "status": "classified",
+       "points": 1,
+       "gap": ""
+      },
+      {
+       "position": 11,
+       "name": "SCKIBLES",
+       "username": "sckibles",
+       "team": "McLaren Mastercard",
+       "short": "McLaren Mastercard",
+       "status": "classified",
+       "points": 0,
+       "gap": ""
+      },
+      {
+       "position": 12,
+       "name": "Yari",
+       "username": "",
+       "team": "",
+       "short": "",
+       "status": "classified",
+       "points": 0,
+       "gap": ""
+      },
+      {
+       "position": 13,
+       "name": "Yoke",
+       "username": "",
+       "team": "",
+       "short": "",
+       "status": "classified",
+       "points": 0,
+       "gap": ""
+      },
+      {
+       "position": 14,
+       "name": "うまスペシャルウィーク",
+       "username": "uma_specialweek",
+       "team": "HONDA · VOLTEX/TOP FUEL RACING",
+       "short": "HONDA · VOLTEX/TOP FUEL RACING",
+       "status": "classified",
+       "points": 0,
+       "gap": ""
+      },
+      {
+       "position": 15,
+       "name": "Striker | CHE | 🇵🇭 | #50",
+       "username": "madmaxy33_alt",
+       "team": "Chevrolet Corvette Z06 GT3.R",
+       "short": "Chevrolet Corvette Z06 GT3.R",
+       "status": "classified",
+       "points": 0,
+       "gap": ""
       }
      ],
      "penalties": []
@@ -132,6 +272,19 @@
    ],
    "standings": {
     "drivers": [
+     {
+      "name": "ASTO | Jamie",
+      "username": "gallon_allen",
+      "team": "Aston Martin Aramco",
+      "points": 41,
+      "starts": 2,
+      "wins": 1,
+      "podiums": 2,
+      "poles": 0,
+      "fastest_laps": 1,
+      "best": 1,
+      "position": 1
+     },
      {
       "name": "AObro13",
       "username": "ww_gaming",
@@ -143,66 +296,53 @@
       "poles": 1,
       "fastest_laps": 1,
       "best": 1,
-      "position": 1
-     },
-     {
-      "name": "ASTO | Jamie",
-      "username": "gallon_allen",
-      "team": "Aston Martin Aramco",
-      "points": 26,
-      "starts": 1,
-      "wins": 1,
-      "podiums": 1,
-      "poles": 0,
-      "fastest_laps": 1,
-      "best": 1,
       "position": 2
-     },
-     {
-      "name": "Jeffz | TGR | 99",
-      "username": "jhjeffz",
-      "team": "TGR Haas Formula 1 Team",
-      "points": 18,
-      "starts": 1,
-      "wins": 0,
-      "podiums": 1,
-      "poles": 1,
-      "fastest_laps": 0,
-      "best": 2,
-      "position": 3
-     },
-     {
-      "name": "Yari",
-      "username": "",
-      "team": "",
-      "points": 15,
-      "starts": 1,
-      "wins": 0,
-      "podiums": 1,
-      "poles": 0,
-      "fastest_laps": 0,
-      "best": 3,
-      "position": 4
      },
      {
       "name": "Batwert",
       "username": "",
       "team": "",
-      "points": 12,
-      "starts": 1,
+      "points": 24,
+      "starts": 2,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
       "fastest_laps": 0,
       "best": 4,
+      "position": 3
+     },
+     {
+      "name": "Jeffz | TGR | 99",
+      "username": "jhjeffz",
+      "team": "TGR Haas Formula 1 Team",
+      "points": 22,
+      "starts": 2,
+      "wins": 0,
+      "podiums": 1,
+      "poles": 1,
+      "fastest_laps": 0,
+      "best": 2,
+      "position": 4
+     },
+     {
+      "name": "anti | #3 | TUH",
+      "username": "antixnf",
+      "team": "Tuhago Mobil 1 Formula 1 Team",
+      "points": 18,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 1,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 2,
       "position": 5
      },
      {
       "name": "Crocs | AMR | 🇮🇨 | #26",
       "username": "thatblueangelfan",
       "team": "Aston Martin Aramco",
-      "points": 10,
-      "starts": 1,
+      "points": 18,
+      "starts": 2,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
@@ -211,17 +351,56 @@
       "position": 6
      },
      {
-      "name": "Yoke",
+      "name": "Yari",
       "username": "",
       "team": "",
-      "points": 8,
+      "points": 15,
+      "starts": 2,
+      "wins": 0,
+      "podiums": 1,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 3,
+      "position": 7
+     },
+     {
+      "name": "Bread | MER | 🇮🇩 | F1 | #29",
+      "username": "not_sergioperez101",
+      "team": "Mercedes AMG // PETRONAS",
+      "points": 10,
       "starts": 1,
       "wins": 0,
       "podiums": 0,
       "poles": 0,
       "fastest_laps": 0,
+      "best": 5,
+      "position": 8
+     },
+     {
+      "name": "Yoke",
+      "username": "",
+      "team": "",
+      "points": 8,
+      "starts": 2,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
       "best": 6,
-      "position": 7
+      "position": 9
+     },
+     {
+      "name": "drsferra7",
+      "username": "drsferra7",
+      "team": "Scuderia Ferrari // HP",
+      "points": 6,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 7,
+      "position": 10
      },
      {
       "name": "Theoxodh | MAW | 🇰🇷 | #71",
@@ -234,30 +413,130 @@
       "poles": 0,
       "fastest_laps": 0,
       "best": 7,
-      "position": 8
+      "position": 11
+     },
+     {
+      "name": "JSDF_TRIGGER",
+      "username": "tirgger1",
+      "team": "HONDA · VOLTEX/TOP FUEL RACING",
+      "points": 2,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 9,
+      "position": 12
+     },
+     {
+      "name": "Mirinda | MCL | 🇧🇭 | #32",
+      "username": "mirindadrinkitup",
+      "team": "McLaren Mastercard",
+      "points": 1,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 10,
+      "position": 13
+     },
+     {
+      "name": "SCKIBLES",
+      "username": "sckibles",
+      "team": "McLaren Mastercard",
+      "points": 0,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 11,
+      "position": 14
+     },
+     {
+      "name": "うまスペシャルウィーク",
+      "username": "uma_specialweek",
+      "team": "HONDA · VOLTEX/TOP FUEL RACING",
+      "points": 0,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 14,
+      "position": 15
+     },
+     {
+      "name": "Striker | CHE | 🇵🇭 | #50",
+      "username": "madmaxy33_alt",
+      "team": "Chevrolet Corvette Z06 GT3.R",
+      "points": 0,
+      "starts": 1,
+      "wins": 0,
+      "podiums": 0,
+      "poles": 0,
+      "fastest_laps": 0,
+      "best": 15,
+      "position": 16
      }
     ],
     "teams": [
      {
       "name": "Aston Martin Aramco",
-      "points": 36,
+      "points": 59,
       "wins": 1,
-      "podiums": 1,
+      "podiums": 2,
       "position": 1
      },
      {
       "name": "McLaren Mastercard",
-      "points": 26,
+      "points": 27,
       "wins": 1,
       "podiums": 1,
       "position": 2
      },
      {
       "name": "TGR Haas Formula 1 Team",
-      "points": 18,
+      "points": 22,
       "wins": 0,
       "podiums": 1,
       "position": 3
+     },
+     {
+      "name": "Tuhago Mobil 1 Formula 1 Team",
+      "points": 18,
+      "wins": 0,
+      "podiums": 1,
+      "position": 4
+     },
+     {
+      "name": "Mercedes AMG // PETRONAS",
+      "points": 10,
+      "wins": 0,
+      "podiums": 0,
+      "position": 5
+     },
+     {
+      "name": "Scuderia Ferrari // HP",
+      "points": 6,
+      "wins": 0,
+      "podiums": 0,
+      "position": 6
+     },
+     {
+      "name": "HONDA · VOLTEX/TOP FUEL RACING",
+      "points": 2,
+      "wins": 0,
+      "podiums": 0,
+      "position": 7
+     },
+     {
+      "name": "Chevrolet Corvette Z06 GT3.R",
+      "points": 0,
+      "wins": 0,
+      "podiums": 0,
+      "position": 8
      }
     ]
    }
@@ -276,6 +555,18 @@
    "detail": "2 rounds · by Octi",
    "by": "Octi",
    "at": "2026-11-12T17:31:30.112Z"
+  },
+  {
+   "action": "round replaced",
+   "detail": "F1 R2 · 15 classified · by Octi",
+   "by": "Octi",
+   "at": "2026-11-12T17:32:31.353Z"
+  },
+  {
+   "action": "published",
+   "detail": "2 rounds · by Octi",
+   "by": "Octi",
+   "at": "2026-11-12T17:32:31.357Z"
   }
  ]
 }
