@@ -2103,18 +2103,22 @@
     }
     if (action === "pole") {
       state.grid.pole = target.value;
+      renderChrome();
       return;
     }
     if (action === "fastest") {
       state.grid.fastest = target.value;
+      renderChrome();
       return;
     }
     if (action === "round-number") {
       state.grid.round = Math.max(1, Number(target.value || 1));
+      renderChrome();
       return;
     }
     if (action === "circuit") {
       state.grid.circuit = target.value;
+      renderChrome();
     }
   });
 
@@ -2124,6 +2128,7 @@
     if (!action) return;
     if (action === "gap" && state.grid) {
       state.grid.entries[Number(target.dataset.index)].gap = target.value;
+      renderChrome();
       return;
     }
     if (action === "paste") {
@@ -2176,7 +2181,10 @@
       if (next) { next.focus(); next.setSelectionRange(next.value.length, next.value.length); }
       return;
     }
-    if (action === "circuit" && state.grid) state.grid.circuit = target.value;
+    if (action === "circuit" && state.grid) {
+      state.grid.circuit = target.value;
+      renderChrome();
+    }
   });
 
   section.addEventListener("submit", (event) => {
