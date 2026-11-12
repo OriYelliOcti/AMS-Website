@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=20261102a">
+<link rel="stylesheet" href="style.css?v=20261112a">
 <script>
   // Set the theme before first paint so the page never flashes the wrong background.
   (function () {
@@ -327,7 +327,10 @@
         <p class="roster-sub">Rounds, decisions and standings, with every driver in the league available. Unlisted; not linked from anywhere on the site.</p>
       </div>
       <div class="fia-head-actions">
-        <button type="button" class="action" data-action="settings" id="fia-settings-toggle" aria-expanded="false" aria-controls="fia-settings">Publish settings</button>
+        <span class="fia-local" id="fia-local-pill">Local desk</span>
+        <button type="button" class="action" data-action="palette" title="Ctrl/Cmd+K">Tools</button>
+        <button type="button" class="action" data-action="help" title="?">Shortcuts</button>
+        <button type="button" class="action" data-action="settings" id="fia-settings-toggle" aria-expanded="false" aria-controls="fia-settings">Desk</button>
         <button type="button" class="action" id="fia-lock">Lock</button>
       </div>
     </header>
@@ -342,17 +345,15 @@
     </form>
 
     <div class="fia-body" id="fia-body" hidden>
-      <section class="fia-settings" id="fia-settings" aria-label="Publish settings" hidden>
-        <h3>Publish settings</h3>
+      <section class="fia-settings" id="fia-settings" aria-label="Desk settings" hidden>
+        <h3>Local desk</h3>
         <div class="fia-form-grid">
-          <label>Bridge URL<input type="text" id="fia-bridge" spellcheck="false" autocomplete="off" placeholder="http://127.0.0.1:8802"></label>
-          <label>Bridge token<input type="password" id="fia-bridge-token" autocomplete="off" spellcheck="false" placeholder="desk token"></label>
           <label>Your name<input type="text" id="fia-author" spellcheck="false" autocomplete="off" placeholder="Who is on the desk"></label>
         </div>
-        <p class="fia-hint">Publishing goes to the desk bridge on the laptop. The GitHub token lives there, so nothing here grants write access to the repo — only the bridge key does, and only while the bridge runs. Everyone has their own key: a publish is recorded under the key’s owner, while <b>Your name</b> is what your own edits say in the audit log.</p>
+        <p class="fia-hint">Publishing goes straight to the bridge on this laptop. There is no token or key to paste: the bridge only listens on <code>127.0.0.1</code>, serves this desk itself, and keeps the GitHub credential out of the browser. Open <code>http://127.0.0.1:8802/#ams-fia</code> on the laptop.</p>
         <div class="fia-actions">
-          <button type="button" class="action" data-action="check-bridge">Check bridge</button>
-          <button type="button" class="action" data-action="forget">Forget token</button>
+          <button type="button" class="action" data-action="check-bridge">Check laptop</button>
+          <button type="button" class="action" data-action="copy-local-url">Copy local URL</button>
         </div>
         <p class="fia-note" id="fia-settings-note" role="status" aria-live="polite"></p>
       </section>
@@ -366,7 +367,11 @@
           <button type="button" data-view="audit" data-action="view" aria-pressed="false">Audit</button>
         </nav>
         <div class="fia-publish">
+          <span class="fia-autosave" id="fia-autosave">Autosave ready</span>
           <span class="fia-dirty" id="fia-dirty" hidden>Unpublished changes</span>
+          <button type="button" class="action" data-action="undo" id="fia-undo" title="Ctrl/Cmd+Z">Undo</button>
+          <button type="button" class="action" data-action="redo" id="fia-redo" title="Ctrl/Cmd+Shift+Z">Redo</button>
+          <button type="button" class="action" data-action="find" title="Ctrl/Cmd+Shift+F">Find</button>
           <button type="button" class="action" data-action="discard" id="fia-discard" hidden>Discard</button>
           <button type="button" class="action" data-action="preview" id="fia-preview">Preview</button>
           <button type="button" class="action action-solid" data-action="publish" id="fia-publish">Publish</button>
@@ -375,8 +380,22 @@
 
       <div class="fia-meta" id="fia-meta"></div>
       <p class="fia-note" id="fia-status" role="status" aria-live="polite"></p>
+      <div id="fia-recovery"></div>
       <div class="fia-view" id="fia-view"></div>
     </div>
+
+    <input type="file" id="fia-import-draft" accept="application/json,.json" hidden>
+    <input type="file" id="fia-import-grid" accept=".csv,.tsv,.txt" hidden>
+  </div>
+
+  <div class="fia-overlay" id="fia-overlay" hidden>
+    <section class="fia-modal" role="dialog" aria-modal="true" aria-labelledby="fia-modal-title">
+      <header class="fia-modal-head">
+        <h3 id="fia-modal-title">Desk tools</h3>
+        <button type="button" class="action" data-action="close-modal">Close</button>
+      </header>
+      <div id="fia-modal-body"></div>
+    </section>
   </div>
 </section>
 
@@ -404,6 +423,6 @@
 <script src="decisions.js?v=20261023a"></script>
 <script src="fantasy.js?v=20261023a"></script>
 <script src="home.js?v=20261023a"></script>
-<script src="fia.js?v=20261102f"></script>
+<script src="fia.js?v=20261112a"></script>
 </body>
 </html>
