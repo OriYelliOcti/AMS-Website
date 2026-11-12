@@ -346,14 +346,14 @@
 
     <div class="fia-body" id="fia-body" hidden>
       <section class="fia-settings" id="fia-settings" aria-label="Desk settings" hidden>
-        <h3>Local desk</h3>
+        <h3>Desk bridge</h3>
         <div class="fia-form-grid">
           <label>Your name<input type="text" id="fia-author" spellcheck="false" autocomplete="off" placeholder="Who is on the desk"></label>
         </div>
-        <p class="fia-hint">Publishing goes straight to the bridge on this laptop. There is no token or key to paste: the bridge only listens on <code>127.0.0.1</code>, serves this desk itself, and keeps the GitHub credential out of the browser. Open <code>http://127.0.0.1:8802/#ams-fia</code> on the laptop.</p>
+        <p class="fia-hint">Publishing goes straight to the bridge on the laptop, either at the local address or through its HTTPS tunnel. There is no token or key to paste: the FIA password stays, and the bridge keeps the GitHub credential out of the browser. On the laptop open <code>http://127.0.0.1:8802/#ams-fia</code>; elsewhere use this page normally.</p>
         <div class="fia-actions">
-          <button type="button" class="action" data-action="check-bridge">Check laptop</button>
-          <button type="button" class="action" data-action="copy-local-url">Copy local URL</button>
+          <button type="button" class="action" data-action="check-bridge">Check bridge</button>
+          <button type="button" class="action" data-action="copy-local-url">Copy desk URL</button>
         </div>
         <p class="fia-note" id="fia-settings-note" role="status" aria-live="polite"></p>
       </section>
@@ -423,6 +423,6 @@
 <script src="decisions.js?v=20261023a"></script>
 <script src="fantasy.js?v=20261023a"></script>
 <script src="home.js?v=20261023a"></script>
-<script src="fia.js?v=20261112b"></script>
+<script src="fia.js?v=20261112c"></script>
 </body>
 </html>

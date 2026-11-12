@@ -7,13 +7,13 @@
 //     the grid editor no longer hides anyone behind a division filter.
 //  2. The finishing order is pasted the way the timing screen prints it —
 //     "Jamie LEADER", "Jeffz + 4.283", "Yoke + 1 LAP" — and parsed here.
-//  3. Publishing is laptop-local only. The bridge (desk_bridge.py) serves this
-//     desk on 127.0.0.1, holds the GitHub credential server-side and commits the
-//     document without asking the browser for a token or an access key.
+//  3. Publishing goes to the bridge on the laptop (desk_bridge.py), either at
+//     the local address or through its HTTPS tunnel. The bridge holds the GitHub
+//     credential server-side and commits the document without asking the browser
+//     for a token or a bridge key.
 //
-// The access code below remains for the public copy of the desk. When the desk
-// is opened from loopback it unlocks directly: the bridge is bound to the
-// laptop and is the only thing that can publish.
+// The FIA password stays. It is required on the local desk and on the public
+// copy; the bridge hashes it again before accepting a publish.
 (() => {
   "use strict";
 
@@ -24,9 +24,13 @@
   const HASH = "#ams-fia";
   const CODE_SHA256 = "387212a44247c12e2829f6f4c49c22c053ca58bba77bcd613d441bac4c716741";
   const UNLOCK_KEY = "ams-fia-unlocked";
+  const PASSWORD_KEY = "ams-fia-password";
   const AUTHOR_KEY = "ams-fia-author";
   const DRAFT_KEY = "ams-fia-local-draft-v2";
   const DEFAULT_BRIDGE = "http://127.0.0.1:8802";
+  // HTTPS tunnel to the laptop bridge. The FIA password is always required by
+  // the bridge; no GitHub token or bridge key is ever sent to this page.
+  const PUBLIC_BRIDGE = "https://amend-psp-impressive-headquarters.trycloudflare.com";
   const RESULTS_PATH = "data/results.json";
   const LINEUPS_PATH = "data/lineups.json";
   const CONTENT_PATH = "data/content.json";
@@ -57,9 +61,10 @@
     search: "",
     preview: null,
     local: localDesk(),
-    // Always the laptop bridge. The bridge also serves this page, so the call
-    // is same-origin; a locally served copy on another port still reaches it.
-    bridge: DEFAULT_BRIDGE,
+    // The local bridge when opened on the laptop; an HTTPS tunnel when this is
+    // the public copy. No bridge key is involved either way.
+    bridge: localDesk() ? DEFAULT_BRIDGE : (PUBLIC_BRIDGE || DEFAULT_BRIDGE),
+    password: sessionStorage.getItem(PASSWORD_KEY) || "",
     author: localStorage.getItem(AUTHOR_KEY) || "",
     lineups: null,
     calendar: null,
@@ -414,6 +419,40 @@
     return lines.join("\n");
   }
 
+  function gridChanged() {
+    const grid = state.grid;
+    if (!grid) return false;
+    const existing = roundOf(grid.division, grid.round);
+    if (!existing && !(grid.entries || []).length) return false;
+    const current = {
+      circuit: text(grid.circuit),
+      pole: text(grid.pole),
+      fastest: text(grid.fastest),
+      entries: (grid.entries || []).map((entry) => ({
+        name: text(entry.name),
+        username: text(entry.username),
+        team: text(entry.team),
+        gap: text(entry.gap),
+        dnf: !!entry.dnf,
+      })),
+    };
+    const saved = existing
+      ? {
+        circuit: text(existing.circuit),
+        pole: text(existing.pole?.username || ""),
+        fastest: text(existing.fastest_lap?.username || ""),
+        entries: (existing.classification || []).map((entry) => ({
+          name: text(entry.name),
+          username: text(entry.username),
+          team: text(entry.short || entry.team || ""),
+          gap: text(entry.gap),
+          dnf: entry.status === "retired" || entry.position === null,
+        })),
+      }
+      : null;
+    return JSON.stringify(current) !== JSON.stringify(saved);
+  }
+
   // Drivers ----------------------------------------------------------------- //
 
   // "ASTO | Jamie" -> asto, jamie; "Jeffz | TGR | 99" -> jeffz, tgr, 99.
@@ -658,10 +697,13 @@
     if (discard) discard.hidden = !state.dirty;
     const publishButton = $("fia-publish");
     if (publishButton) {
-      publishButton.disabled = state.busy || !state.dirty || !state.local;
-      publishButton.title = state.local
-        ? "Publish through the laptop bridge"
-        : "Open the local desk on the laptop to publish";
+      const pending = state.dirty || gridChanged();
+      publishButton.disabled = state.busy || !pending || !state.password;
+      publishButton.title = !state.password
+        ? "Unlock the desk with the FIA password first"
+        : pending
+          ? (state.dirty ? "Publish through the laptop bridge" : "Publish will save the open round first")
+          : "Make a change before publishing";
     }
     const undo = $("fia-undo");
     if (undo) undo.disabled = !state.history.length || state.busy;
@@ -673,7 +715,7 @@
       : "Autosave ready";
     const localPill = $("fia-local-pill");
     if (localPill) {
-      localPill.textContent = state.local ? "Laptop desk" : "Open on laptop to publish";
+      localPill.textContent = state.local ? "Laptop desk" : "Remote desk";
       localPill.classList.toggle("is-public", !state.local);
     }
     for (const button of section.querySelectorAll("[data-view]")) {
@@ -1293,14 +1335,14 @@
   // Bridge ------------------------------------------------------------------- //
 
   async function bridgeCall(path, body) {
-    if (!state.local) throw new Error("Open this desk on the laptop to publish.");
+    if (!state.password) throw new Error("Unlock with the FIA password first.");
     const response = await fetch(`${state.bridge.replace(/\/$/, "")}${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, password: state.password }),
     });
     const data = await response.json().catch(() => null);
-    if (!response.ok) throw new Error(data?.problem || `Laptop bridge answered HTTP ${response.status}`);
+    if (!response.ok) throw new Error(data?.problem || `Desk bridge answered HTTP ${response.status}`);
     return data;
   }
 
@@ -1308,16 +1350,22 @@
     const offline = /Failed to fetch|NetworkError|Load failed|NetworkError when/i.test(String(error?.message || ""));
     if (!offline) return error.message;
     if (!state.local) {
-      return `This page cannot publish. Open http://127.0.0.1:8802/#ams-fia on the laptop.`;
+      return `Could not reach the desk tunnel at ${state.bridge}. Is the laptop bridge and its HTTPS tunnel running?`;
     }
-    return `Could not reach ${state.bridge}. Start the laptop bridge with ./run-desk.sh (or desk_bridge.py) first.`;
+    return `Could not reach ${state.bridge}. Start the laptop bridge with ./run-desk.sh first.`;
   }
 
   async function publish() {
     if (state.busy) return;
-    if (!state.local) {
-      say("Publishing is laptop-only. Open http://127.0.0.1:8802/#ams-fia on the laptop.", true);
+    if (!state.password) {
+      say("Unlock the desk with the FIA password first.", true);
       return;
+    }
+    // A steward often edits the grid and presses Publish without pressing
+    // "Save round to draft" first. Save that open round now, then publish it.
+    if (!state.dirty && state.grid && gridChanged()) {
+      gridSave();
+      if (!state.dirty) return;
     }
     const check = validateDraft();
     state.validation = check;
@@ -1358,17 +1406,14 @@
 
   async function checkBridge() {
     const note = $("fia-settings-note");
-    if (!state.local) {
-      note.textContent = "This is the public copy. Open the local desk on the laptop to publish.";
-      return;
-    }
-    note.textContent = "Checking the laptop bridge…";
+    if (!note) return;
+    note.textContent = "Checking the desk bridge…";
     try {
       const response = await fetch(`${state.bridge.replace(/\/$/, "")}/health`, { cache: "no-store" });
       const data = await response.json().catch(() => null);
       note.textContent = response.ok && data?.ok
-        ? "Laptop bridge is up — direct publishing is ready."
-        : `Laptop bridge answered HTTP ${response.status}.`;
+        ? "Desk bridge is up — publishing is ready."
+        : `Desk bridge answered HTTP ${response.status}.`;
     } catch (error) {
       note.textContent = bridgeHint(error);
     }
@@ -1384,11 +1429,14 @@
     if (!value) return;
     const hashed = await digest(value);
     if (hashed === CODE_SHA256) {
+      state.password = value;
+      sessionStorage.setItem(PASSWORD_KEY, value);
       sessionStorage.setItem(UNLOCK_KEY, "1");
       note.textContent = "";
       note.classList.remove("error");
       setMode(true);
       await load();
+      checkBridge();
       return;
     }
     note.textContent = "That code is not right.";
@@ -1401,7 +1449,11 @@
     $("fia-gate").hidden = unlocked;
     section.classList.toggle("is-unlocked", unlocked);
     document.title = unlocked ? `FIA · ${publicTitle}` : publicTitle;
-    if (!unlocked) sessionStorage.removeItem(UNLOCK_KEY);
+    if (!unlocked) {
+      state.password = "";
+      sessionStorage.removeItem(UNLOCK_KEY);
+      sessionStorage.removeItem(PASSWORD_KEY);
+    }
   }
 
   function isOpen() {
@@ -1718,7 +1770,8 @@
       return;
     }
     if (action === "copy-local-url") {
-      copyText("http://127.0.0.1:8802/#ams-fia").then((ok) => say(ok ? "Local desk URL copied." : "Copy failed — open http://127.0.0.1:8802/#ams-fia directly.", !ok));
+      const deskUrl = `${state.bridge.replace(/\/$/, "")}/#ams-fia`;
+      copyText(deskUrl).then((ok) => say(ok ? "Desk URL copied." : `Copy failed — open ${deskUrl} directly.`, !ok));
       return;
     }
     if (action === "undo") {
@@ -2289,10 +2342,10 @@
     window.scrollTo({ top: 0 });
     // The local bridge only listens on loopback, so possession of the desk is
     // the credential. No code, no bridge token: open it and work.
-    if (state.local || isOpen()) {
+    if (isOpen() && state.password) {
       setMode(true);
-      if (!state.loaded) load().then(() => { if (state.local) checkBridge(); });
-      else if (state.local) checkBridge();
+      if (!state.loaded) load().then(() => checkBridge());
+      else checkBridge();
     } else {
       setMode(false);
       const input = $("fia-password");
