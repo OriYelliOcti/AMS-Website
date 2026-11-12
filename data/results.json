@@ -1,7 +1,7 @@
 {
  "schema": 2,
  "season": "Season 1",
- "updated_at": "2026-11-12T17:32:31.357Z",
+ "updated_at": "2026-11-12T17:32:54.725Z",
  "divisions": [
   {
    "name": "F1",
@@ -113,7 +113,7 @@
       "username": "ww_gaming",
       "team": "McLaren Mastercard"
      },
-     "recorded_at": "2026-11-12T17:32:31.353Z",
+     "recorded_at": "2026-11-12T17:32:54.721Z",
      "recorded_by": "Octi",
      "classification": [
       {
@@ -134,7 +134,7 @@
        "short": "Tuhago Mobil 1 Formula 1 Team",
        "status": "classified",
        "points": 18,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 3,
@@ -144,7 +144,7 @@
        "short": "Aston Martin Aramco",
        "status": "classified",
        "points": 15,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 4,
@@ -154,7 +154,7 @@
        "short": "",
        "status": "classified",
        "points": 12,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 5,
@@ -164,7 +164,7 @@
        "short": "Mercedes AMG // PETRONAS",
        "status": "classified",
        "points": 10,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 6,
@@ -174,7 +174,7 @@
        "short": "Aston Martin Aramco",
        "status": "classified",
        "points": 8,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 7,
@@ -184,7 +184,7 @@
        "short": "Scuderia Ferrari // HP",
        "status": "classified",
        "points": 6,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 8,
@@ -194,7 +194,7 @@
        "short": "TGR Haas Formula 1 Team",
        "status": "classified",
        "points": 4,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 9,
@@ -204,7 +204,7 @@
        "short": "HONDA · VOLTEX/TOP FUEL RACING",
        "status": "classified",
        "points": 2,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 10,
@@ -214,7 +214,7 @@
        "short": "McLaren Mastercard",
        "status": "classified",
        "points": 1,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 11,
@@ -224,7 +224,7 @@
        "short": "McLaren Mastercard",
        "status": "classified",
        "points": 0,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 12,
@@ -234,7 +234,7 @@
        "short": "",
        "status": "classified",
        "points": 0,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 13,
@@ -244,7 +244,7 @@
        "short": "",
        "status": "classified",
        "points": 0,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 14,
@@ -254,7 +254,7 @@
        "short": "HONDA · VOLTEX/TOP FUEL RACING",
        "status": "classified",
        "points": 0,
-       "gap": ""
+       "gap": "+1"
       },
       {
        "position": 15,
@@ -264,7 +264,7 @@
        "short": "Chevrolet Corvette Z06 GT3.R",
        "status": "classified",
        "points": 0,
-       "gap": ""
+       "gap": "+1"
       }
      ],
      "penalties": []
@@ -567,6 +567,18 @@
    "detail": "2 rounds · by Octi",
    "by": "Octi",
    "at": "2026-11-12T17:32:31.357Z"
+  },
+  {
+   "action": "round replaced",
+   "detail": "F1 R2 · 15 classified · by Octi",
+   "by": "Octi",
+   "at": "2026-11-12T17:32:54.721Z"
+  },
+  {
+   "action": "published",
+   "detail": "2 rounds · by Octi",
+   "by": "Octi",
+   "at": "2026-11-12T17:32:54.725Z"
   }
  ]
 }
