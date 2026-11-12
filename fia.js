@@ -29,6 +29,7 @@
   const DEFAULT_BRIDGE = "http://127.0.0.1:8802";
   const RESULTS_PATH = "data/results.json";
   const LINEUPS_PATH = "data/lineups.json";
+  const CONTENT_PATH = "data/content.json";
   const LOCALE = "en-GB";
   const HISTORY_LIMIT = 50;
   const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
@@ -61,6 +62,7 @@
     bridge: DEFAULT_BRIDGE,
     author: localStorage.getItem(AUTHOR_KEY) || "",
     lineups: null,
+    calendar: null,
     drivers: [],
     history: [],
     future: [],
@@ -619,11 +621,13 @@
     if (state.loaded && !force) return;
     say("Loading the published season…");
     try {
-      const [results, lineups] = await Promise.all([
+      const [results, lineups, content] = await Promise.all([
         fetchJson(RESULTS_PATH),
         fetchJson(LINEUPS_PATH),
+        fetchJson(CONTENT_PATH),
       ]);
       state.lineups = lineups || { divisions: [] };
+      state.calendar = content?.calendar || null;
       state.published = CORE.normalizeDocument(results || CORE.emptyDocument("Season 1"));
       state.doc = JSON.parse(JSON.stringify(state.published));
       state.loaded = true;
@@ -1143,9 +1147,20 @@
     const division = state.division || divisions()[0];
     const numbers = roundsOf(division).map((round) => Number(round.round) || 0);
     const next = numbers.length ? Math.max(...numbers) + 1 : 1;
-    state.grid = { division, round: next, circuit: "", pole: "", fastest: "", entries: [] };
+    const scheduled = (state.calendar?.rounds || []).find((round) => Number(round.round) === next);
+    state.grid = {
+      division,
+      round: next,
+      circuit: scheduled?.circuit || "",
+      pole: "",
+      fastest: "",
+      entries: [],
+    };
     state.round = next;
     state.preview = null;
+    say(scheduled?.circuit
+      ? `New ${division} R${next} pre-filled from the calendar: ${scheduled.circuit}.`
+      : `New ${division} R${next} ready.`);
     render();
   }
 
@@ -1566,7 +1581,6 @@
 
   function helpBody() {
     const tools = [
-      "Token-free laptop publishing — bridge on 127.0.0.1, no key in the browser",
       "Command palette with Ctrl/Cmd+K",
       "Undo and redo for every draft change",
       "Autosave plus crash recovery on this laptop",
@@ -1586,6 +1600,7 @@
       "Audit-log search",
       "Fill a grid from the current lineups",
       "Copy a Discord-ready round summary",
+      "Calendar-aware new rounds that prefill the circuit",
     ];
     return `<p class="fia-hint">This desk publishes only on the laptop. The public copy is read-only, and the bridge is loopback-only.</p>
       <div class="fia-shortcuts">
