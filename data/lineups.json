@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-11-22T09:10:47+00:00",
+ "generated_at": "2026-11-22T20:46:46+00:00",
  "guild": {
   "name": "Aggoon's Place"
  },
@@ -661,11 +661,6 @@
      "bot": false
     },
     {
-     "name": "Neon | FIA Pres | 🇨🇦 | F1 D",
-     "username": "neon32133",
-     "bot": false
-    },
-    {
      "name": "Niki | FIA | 🇮🇹 | STW",
      "username": "niki301242",
      "bot": false
@@ -708,16 +703,6 @@
    ]
   },
   {
-   "role": "[🧑‍✈️] FIA President",
-   "members": [
-    {
-     "name": "Neon | FIA Pres | 🇨🇦 | F1 D",
-     "username": "neon32133",
-     "bot": false
-    }
-   ]
-  },
-  {
    "role": "[🧑‍💻] FIA Assistants",
    "members": [
     {
@@ -726,6 +711,10 @@
      "bot": false
     }
    ]
+  },
+  {
+   "role": "[🧑‍✈️] FIA President",
+   "members": []
   }
  ]
 }
