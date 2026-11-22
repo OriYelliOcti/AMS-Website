@@ -1,13 +1,13 @@
 {
  "schema": 1,
- "generated_at": "2026-11-16T16:51:18+00:00",
+ "generated_at": "2026-11-22T09:10:47+00:00",
  "guild": {
   "name": "Aggoon's Place"
  },
  "totals": {
   "divisions": 4,
   "teams": 42,
-  "rostered": 24,
+  "rostered": 21,
   "officials": 5
  },
  "divisions": [
@@ -61,7 +61,7 @@
      "name": "[F1] HONDA · VOLTEX/TOP FUEL RACING",
      "short": "HONDA · VOLTEX/TOP FUEL RACING",
      "color": "#cc0000",
-     "member_count": 5,
+     "member_count": 4,
      "slots": [
       {
        "slot": "Driver",
@@ -84,16 +84,6 @@
         {
          "name": "さきいか",
          "username": "mio_ao",
-         "bot": false
-        }
-       ]
-      },
-      {
-       "slot": "Team Boss",
-       "members": [
-        {
-         "name": "RuTa | 🇯🇵 |",
-         "username": "ruta_0160",
          "bot": false
         }
        ]
@@ -209,18 +199,8 @@
      "name": "[F1] Scuderia Ferrari // HP",
      "short": "Scuderia Ferrari // HP",
      "color": "#e12323",
-     "member_count": 2,
+     "member_count": 1,
      "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "drsferra7",
-         "username": "drsferra7",
-         "bot": false
-        }
-       ]
-      },
       {
        "slot": "Team Boss",
        "members": [
@@ -244,7 +224,7 @@
        "members": [
         {
          "name": "Lauuu",
-         "username": "lauuuson",
+         "username": "lauuusito",
          "bot": false
         }
        ]
@@ -363,19 +343,8 @@
      "name": "[F2] HONDA · VOLTEX/TOP FUEL RACING",
      "short": "HONDA · VOLTEX/TOP FUEL RACING",
      "color": "#cc0000",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Team Boss",
-       "members": [
-        {
-         "name": "RuTa | 🇯🇵 |",
-         "username": "ruta_0160",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     },
     {
      "name": "[F2] Intel Dynamics F2 Team",
@@ -388,18 +357,8 @@
      "name": "[F2] Make A Wish Motorsports F2 Team",
      "short": "Make A Wish Motorsports F2 Team",
      "color": "#3498db",
-     "member_count": 2,
+     "member_count": 1,
      "slots": [
-      {
-       "slot": "Driver",
-       "members": [
-        {
-         "name": "Theoxodh | MAW | 🇰🇷 | #71",
-         "username": "happy_theooooooooooooooooooooooo",
-         "bot": false
-        }
-       ]
-      },
       {
        "slot": "Team Boss",
        "members": [
@@ -509,19 +468,8 @@
      "name": "[F3] HONDA · VOLTEX/TOP FUEL RACING",
      "short": "HONDA · VOLTEX/TOP FUEL RACING",
      "color": "#cc0000",
-     "member_count": 1,
-     "slots": [
-      {
-       "slot": "Team Boss",
-       "members": [
-        {
-         "name": "RuTa | 🇯🇵 |",
-         "username": "ruta_0160",
-         "bot": false
-        }
-       ]
-      }
-     ]
+     "member_count": 0,
+     "slots": []
     },
     {
      "name": "[F3] Make A Wish Motorsports F3 Team",
@@ -740,11 +688,6 @@
     {
      "name": "Niki | FIA | 🇮🇹 | STW",
      "username": "niki301242",
-     "bot": false
-    },
-    {
-     "name": "tomsebee",
-     "username": "tomsebee",
      "bot": false
     }
    ]
